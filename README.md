@@ -9,7 +9,7 @@
 * WrkzCoin - choose `wrkzcoin` or `chukwa_wrkz`
 
 ## Notes
-* Supports xmrig-proxy - Make sure to enable `niceHash: true` in your pool config.
+* Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
 
 ## Example Config
 
