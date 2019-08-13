@@ -50,10 +50,15 @@ void MinerManager::setNewJob(const Job &job)
 
 void MinerManager::start()
 {
+    if (!m_threads.empty() || m_statsThread.joinable())
+    {
+        stop();
+    }
+
     m_shouldStop = false;
 
     /* Login to the pool */
-    m_pool->login();
+    m_pool->login(true);
 
     /* Get the initial job to work on */
     m_currentJob = m_pool->getJob();
@@ -100,6 +105,11 @@ void MinerManager::start()
 
 void MinerManager::resumeMining()
 {
+    if (!m_threads.empty() || m_statsThread.joinable())
+    {
+        pauseMining();
+    }
+
     m_shouldStop = false;
 
     std::cout << WhiteMsg("Resuming mining.") << std::endl;

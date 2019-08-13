@@ -159,13 +159,13 @@ void PoolCommunication::registerHandlers()
     });
 }
 
-void PoolCommunication::login()
+void PoolCommunication::login(const bool initialLogin)
 {
     while (true)
     {
         for (auto &pool : m_allPools)
         {
-            m_socket = std::make_shared<sockwrapper::SocketWrapper>(
+            const auto tmpSocket = std::make_shared<sockwrapper::SocketWrapper>(
                 pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
             );
 
@@ -175,7 +175,7 @@ void PoolCommunication::login()
 
             for (int i = 1; i <= Constants::MAX_LOGIN_ATTEMPTS; i++)
             {
-                const bool success = m_socket->start();
+                const bool success = tmpSocket->start();
 
                 if (!success)
                 {
@@ -196,7 +196,7 @@ void PoolCommunication::login()
                     {"jsonrpc", "2.0"}
                 };
 
-                const auto res = m_socket->sendMessageAndGetResponse(loginMsg.dump() + "\n");
+                const auto res = tmpSocket->sendMessageAndGetResponse(loginMsg.dump() + "\n");
 
                 if (res)
                 {
@@ -211,15 +211,20 @@ void PoolCommunication::login()
                             pool.niceHash = true;
                         }
 
+                        if (m_socket)
+                        {
+                            m_socket->stop();
+                        }
+
+                        m_socket = tmpSocket;
                         m_currentPool = pool;
                         m_currentPool.loginID = message.loginID;
                         m_preferredPool = i == 1;
                         m_currentJob = message.job;
-
                         
                         registerHandlers();
 
-                        if (m_onPoolSwapped)
+                        if (m_onPoolSwapped && !initialLogin)
                         {
                             m_onPoolSwapped(pool);
                         }
@@ -309,6 +314,13 @@ void PoolCommunication::onPoolDisconnected(const std::function<void(void)> callb
    reconnecting */
 void PoolCommunication::startManaging()
 {
+    m_shouldStop = true;
+
+    if (m_managerThread.joinable())
+    {
+        m_managerThread.join();
+    }
+
     m_shouldStop = false;
 
     m_managerThread = std::thread(&PoolCommunication::managePools, this);
@@ -334,7 +346,7 @@ void PoolCommunication::managePools()
             return;
         }
 
-        login();
+        login(false);
 
         m_shouldFindNewPool = false;
     }

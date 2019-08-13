@@ -18,7 +18,7 @@ class PoolCommunication
     ~PoolCommunication();
 
     /* Open socket and connect to one of the pools */
-    void login();
+    void login(const bool initialLogin);
 
     /* Close current socket connection */
     void logout();
