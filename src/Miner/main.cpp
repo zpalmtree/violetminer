@@ -17,10 +17,11 @@ std::vector<Pool> getDevPools()
     std::vector<Pool> pools;
 
     Pool pool1;
-    pool1.host = "127.0.0.1";
-    pool1.port = 5555;
-    pool1.username = "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW";
-    pool1.algorithm = "chukwa";
+    pool1.host = "donate.futuregadget.xyz";
+    pool1.port = 3333;
+    pool1.username = "donate";
+    pool1.algorithm = "turtlecoin";
+    pool1.niceHash = true;
     pool1.algorithmGenerator = ArgonVariant::Algorithms[pool1.algorithm];
 
     pools.push_back(pool1);
