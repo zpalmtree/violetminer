@@ -52,15 +52,6 @@ endif ()
 # Add an executable called violetminer with main.cpp as the entrypoint
 add_executable(violetminer main.cpp GetConfig.cpp)
 
-# Need to link against pthreads on non windows
-if (NOT MSVC AND NOT ANDROID_CROSS_COMPILE)
-    target_link_libraries(violetminer pthread)
-endif()
-
-if (OPENSSL_FOUND)
-    target_link_libraries(violetminer ${OPENSSL_LIBRARIES})
-endif()
-
 # Link violetminer to the libraries it uses
 target_link_libraries(violetminer
     ArgonVariants
@@ -70,3 +61,13 @@ target_link_libraries(violetminer
     PoolCommunication
     Types
     Utilities)
+
+# Need to link against pthreads on non windows
+if (NOT MSVC AND NOT ANDROID_CROSS_COMPILE)
+    find_package(Threads REQUIRED)
+    target_link_libraries(violetminer Threads::Threads)
+endif()
+
+if (OPENSSL_FOUND)
+    target_link_libraries(violetminer ${OPENSSL_LIBRARIES})
+endif()
