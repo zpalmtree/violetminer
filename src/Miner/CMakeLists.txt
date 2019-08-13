@@ -1,3 +1,5 @@
+option(ANDROID_CROSS_COMPILE "Build with android NDK" OFF)
+
 set(OPENSSL_USE_STATIC_LIBS ON)
 
 if (MSVC)
@@ -51,7 +53,7 @@ endif ()
 add_executable(violetminer main.cpp GetConfig.cpp)
 
 # Need to link against pthreads on non windows
-if (NOT MSVC)
+if (NOT MSVC AND NOT ANDROID_CROSS_COMPILE)
     target_link_libraries(violetminer pthread)
 endif()
 

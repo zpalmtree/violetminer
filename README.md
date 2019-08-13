@@ -131,6 +131,27 @@ You need to modify the below command for your version of ubuntu - see https://ap
 - `cmake ..`
 - `make`
 
+### Android Cross Compile
+
+Using [this](https://android.googlesource.com/platform/ndk/+/ndk-release-r20/build/cmake/android.toolchain.cmake) toolchain
+
+ANDROID_ABI can be 
+
+* armeabi-v7a
+* arm64-v8a
+* x86
+* x86_64
+
+Set this depending on the architecture of the phone you want to run it on.
+
+- `git clone https://github.com/turtlecoin/violetminer`
+- `cd violetminer`
+- `git submodule update --init --recursive`
+- `mkdir build`
+- `cd build`
+- `cmake -DCMAKE_TOOLCHAIN_FILE="${HOME}/Android/sdk/android-ndk-r20/build/cmake/android.toolchain.cmake" -DANDROID_ABI=arm64-v8a -DANDROID_CROSS_COMPILE=ON ..`
+- `make`
+
 ## Developing
 
 * Update submodules to lastest commit: `git submodule foreach git pull origin master`
