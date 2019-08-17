@@ -103,7 +103,7 @@ script:
 deploy:
     - provider: releases
       api_key: $GITHUB_TOKEN
-      file: build/${RELEASE_FILENAME}.${RELEASE_FILETYPE}
+      file: ${RELEASE_FILENAME}.${RELEASE_FILETYPE}
       skip_cleanup: true
       on:
         tags: true
