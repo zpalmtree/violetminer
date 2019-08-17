@@ -83,6 +83,21 @@ void PoolCommunication::logout()
     }
 }
 
+void PoolCommunication::getNewJob()
+{
+    const nlohmann::json newJobMsg = {
+        {"method", "getjob"},
+        {"params", {
+            {"id", m_currentPool.loginID},
+            {"rigid", m_currentPool.rigID},
+            {"agent", m_currentPool.getAgent()},
+        }},
+        {"id", 1}
+    };
+
+    m_socket->sendMessage(newJobMsg.dump() + "\n");
+}
+
 void PoolCommunication::registerHandlers()
 {
     m_socket->onMessage([this](std::string message) {
@@ -129,6 +144,10 @@ void PoolCommunication::registerHandlers()
                 else if (errorMessage == "Invalid nonce; is miner not compatible with NiceHash?")
                 {
                     std::cout << WarningMsg("Make sure \"niceHash\" is set to true in your config file.") << std::endl;
+                }
+                else if (errorMessage == "Invalid job id")
+                {
+                    getNewJob();
                 }
             }
             else

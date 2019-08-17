@@ -66,6 +66,9 @@ class PoolCommunication
 
     void registerHandlers();
 
+    /* Request the latest job from the pool */
+    void getNewJob();
+
     /* The current pool we are connected to */
     Pool m_currentPool;
 
