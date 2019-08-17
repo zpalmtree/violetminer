@@ -1,10 +1,16 @@
 # violetminer
 
+![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/640px-Argon_discharge_tube.jpg)
+
 A CPU miner for Argon2i, Argon2d, and Argon2id.
 
 [![Build Status](https://travis-ci.org/turtlecoin/violetminer.svg?branch=master)](https://travis-ci.org/turtlecoin/violetminer)
 
-![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/640px-Argon_discharge_tube.jpg)
+## Download
+
+[Go here to download the latest release.](https://github.com/turtlecoin/violetminer/releases) 
+
+If you prefer to compile yourself, read on. This can result in increased hashrates in some cases.
 
 ## Algorithms Supported
 * TurtleCoin - choose `turtlecoin` or `chukwa`
