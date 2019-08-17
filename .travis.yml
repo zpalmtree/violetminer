@@ -19,10 +19,9 @@ matrix:
           - gcc-8
     env:
     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-    - LABEL="linux"
+    - LABEL="linux-g++-8"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
-    - _DEPLOYABLE="true"
 
   # Ubuntu, clang-6
   - os: linux
@@ -40,9 +39,10 @@ matrix:
           - libstdc++-7-dev
     env:
     - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
-    - LABEL="linux-clang-6"
+    - LABEL="linux"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
+    - _DEPLOYABLE="true"
 
   # OSX, clang
   - os: osx
