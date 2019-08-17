@@ -37,4 +37,18 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Add custom modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/Argon2/src/Intrinsics")
+
+# Use the TargetArch module to figure out what arch we're compiling for
+include(TargetArch)
+target_architecture(ARCH)
+
+if("${ARCH}" STREQUAL "x86_64")
+    add_definitions(-DX86_OPTIMIZATIONS)
+else()
+    message(STATUS "Using cross platform code")
+    add_definitions(-DNO_OPTIMIZATIONS)
+endif()
+
 add_subdirectory(src)

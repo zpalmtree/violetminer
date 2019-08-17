@@ -6,6 +6,9 @@ add_subdirectory(ArgonVariants)
 # Add the Argon2 directory to add that library
 add_subdirectory(Argon2)
 
+# Add the Config directory to add that library
+add_subdirectory(Config)
+
 # Add the Miner directory to add the actual executable
 add_subdirectory(Miner)
 
@@ -23,6 +26,9 @@ add_subdirectory(Utilities)
 
 # Add the current directory as an include directory for ArgonVariants
 target_include_directories(ArgonVariants PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Add the current directory as an include directory for Config
+target_include_directories(Config PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Add the current directory as an include directory for MinerManager
 target_include_directories(MinerManager PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

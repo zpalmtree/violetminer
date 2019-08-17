@@ -16,11 +16,16 @@
 #include "Utilities/Input.h"
 #include "Utilities/String.h"
 
+#if defined(X86_OPTIMIZATIONS)
+#include "cpu_features/include/cpuinfo_x86.h"
+#endif
+
 void to_json(nlohmann::json &j, const MinerConfig &config)
 {
     j = {
         {"threadCount", config.threadCount},
-        {"pools", config.pools}
+        {"pools", config.pools},
+        {"optimizationMethod", config.optimizationMethod}
     };
 }
 
@@ -32,6 +37,64 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     {
         config.threadCount = j.at("threadCount").get<uint32_t>();
     }
+
+    if (j.find("optimizationMethod") != j.end())
+    {
+        const auto optimizations = getAvailableOptimizations();
+
+        config.optimizationMethod = j.at("optimizationMethod").get<std::string>();
+
+        const auto it = std::find(optimizations.begin(), optimizations.end(), config.optimizationMethod);
+
+        if (it == optimizations.end())
+        {
+            throw std::invalid_argument("Optimization " + config.optimizationMethod + " is either unknown, or unavailable for your hardware.");
+        }
+    }
+    else
+    {
+        config.optimizationMethod = getBestAvailableOptimization();
+    }
+}
+
+std::vector<std::string> getAvailableOptimizations()
+{
+    std::vector<std::string> availableOptimizations;
+
+    #if defined(X86_OPTIMIZATIONS)
+
+    static const cpu_features::X86Features features = cpu_features::GetX86Info().features;
+
+    if (features.avx512f)
+    {
+        availableOptimizations.push_back("AVX-512");
+    }
+
+    if (features.avx2)
+    {
+        availableOptimizations.push_back("AVX2");
+    }
+
+    if (features.sse3)
+    {
+        availableOptimizations.push_back("SSE3");
+    }
+
+    if (features.sse2)
+    {
+        availableOptimizations.push_back("SSE2");
+    }
+
+    #endif
+
+    availableOptimizations.push_back("None");
+    
+    return availableOptimizations;
+}
+
+std::string getBestAvailableOptimization()
+{
+    return getAvailableOptimizations()[0];
 }
 
 Pool getPool()
@@ -101,7 +164,7 @@ Pool getPool()
 
     while (true)
     {
-        std::cout << InformationMsg("Available mining algorithms:") << std::endl;
+        std::cout << InformationMsg("\nAvailable mining algorithms:") << std::endl;
 
         for (const auto [algorithm, hashingFunc] : ArgonVariant::Algorithms)
         {
@@ -183,6 +246,8 @@ MinerConfig getConfigInteractively()
     MinerConfig config;
 
     config.pools = getPools();
+    config.optimizationMethod = getBestAvailableOptimization();
+    config.interactive = true;
 
     std::ofstream configFile(Constants::CONFIG_FILE_NAME);
 

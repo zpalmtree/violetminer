@@ -61,6 +61,7 @@ target_link_libraries(violetminer
     ArgonVariants
     Argon2
     Blake2
+    Config
     MinerManager
     PoolCommunication
     Types

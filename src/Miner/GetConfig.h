@@ -16,11 +16,19 @@ struct MinerConfig
     uint32_t threadCount = std::thread::hardware_concurrency();
 
     std::string configLocation;
+
+    std::string optimizationMethod;
+
+    bool interactive = false;
 };
 
 void to_json(nlohmann::json &j, const MinerConfig &config);
 
 void from_json(const nlohmann::json &j, MinerConfig &config);
+
+std::vector<std::string> getAvailableOptimizations();
+
+std::string getBestAvailableOptimization();
 
 Pool getPool();
 
