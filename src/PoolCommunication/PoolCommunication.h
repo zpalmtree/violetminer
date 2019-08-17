@@ -72,6 +72,8 @@ class PoolCommunication
     /* Request the latest job from the pool */
     void getNewJob();
 
+    bool tryLogin(const Pool &pool);
+
     /* The current pool we are connected to */
     Pool m_currentPool;
 
@@ -80,10 +82,6 @@ class PoolCommunication
 
     /* The socket instance for the pool we are talking to */
     std::shared_ptr<sockwrapper::SocketWrapper> m_socket;
-
-    /* Are we currently mining on the preferred pool? If we aren't, we will
-       try reconnecting to more preferred pools periodically */
-    bool m_preferredPool;
 
     /* The current job to be working on */
     Job m_currentJob;
@@ -104,17 +102,17 @@ class PoolCommunication
     std::condition_variable m_findNewPool;
 
     /* Used along with m_findNewPool */
-    bool m_shouldFindNewPool = false;
+    bool m_shouldFindNewPool = true;
 
     /* Manages connecting to other pools */
     std::thread m_managerThread;
-
-    /* Keeps the connection alive */
-    std::thread m_pingThread;
 
     /* Handle stopping the manager thread */
     std::atomic<bool> m_shouldStop;
 
     /* Handle signaling between threads */
     std::mutex m_mutex;
+
+    /* Which pool are we mining on? 0 = most preferred */
+    uint32_t m_currentPoolIndex;
 };

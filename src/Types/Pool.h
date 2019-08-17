@@ -44,7 +44,7 @@ struct Pool
     /* Gets an instance of the mining algorithm used for this pool */
     std::function<std::shared_ptr<IHashingAlgorithm>(void)> algorithmGenerator;
 
-    inline std::string getAgent()
+    inline std::string getAgent() const
     {
         return agent == "" ? "violetminer-" + Constants::VERSION : agent;
     }

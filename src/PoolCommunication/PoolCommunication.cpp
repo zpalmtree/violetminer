@@ -82,11 +82,6 @@ void PoolCommunication::logout()
     {
         m_managerThread.join();
     }
-
-    if (m_pingThread.joinable())
-    {
-        m_pingThread.join();
-    }
 }
 
 void PoolCommunication::getNewJob()
@@ -192,109 +187,6 @@ void PoolCommunication::registerHandlers()
     });
 }
 
-void PoolCommunication::login(const bool initialLogin)
-{
-    while (true)
-    {
-        for (auto &pool : m_allPools)
-        {
-            const auto tmpSocket = std::make_shared<sockwrapper::SocketWrapper>(
-                pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
-            );
-
-            std::stringstream stream;
-
-            std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Attempting to connect to pool...") << std::endl;
-
-            for (int i = 1; i <= Constants::MAX_LOGIN_ATTEMPTS; i++)
-            {
-                const bool success = tmpSocket->start();
-
-                if (!success)
-                {
-                    loginFailed(pool, i, true);
-                    continue;
-                }
-
-                
-                const nlohmann::json loginMsg = {
-                    {"method", "login"},
-                    {"params", {
-                        {"login", pool.username},
-                        {"pass", pool.password},
-                        {"rigid", pool.rigID},
-                        {"agent", pool.getAgent()}
-                    }},
-                    {"id", 1},
-                    {"jsonrpc", "2.0"}
-                };
-
-                const auto res = tmpSocket->sendMessageAndGetResponse(loginMsg.dump() + "\n");
-
-                if (res)
-                {
-                    try
-                    {
-                        const LoginMessage message = nlohmann::json::parse(*res);
-
-                        std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Logged in.") << std::endl;
-
-                        if (*message.job.nonce() != 0)
-                        {
-                            pool.niceHash = true;
-                        }
-
-                        if (m_socket)
-                        {
-                            m_socket->stop();
-                        }
-
-                        m_socket = tmpSocket;
-                        m_currentPool = pool;
-                        m_currentPool.loginID = message.loginID;
-                        m_preferredPool = i == 1;
-                        m_currentJob = message.job;
-                        
-                        registerHandlers();
-
-                        if (m_onPoolSwapped && !initialLogin)
-                        {
-                            m_onPoolSwapped(pool);
-                        }
-
-                        return;
-
-                    }
-                    catch (const std::exception &)
-                    {
-                        try
-                        {
-                            /* Failed to parse as LoginMessage. Maybe it's an error message? */
-                            const ErrorMessage message = nlohmann::json::parse(*res);
-                            loginFailed(pool, i, false, message.error.errorMessage);
-                        }
-                        catch (const std::exception &e)
-                        {
-                            loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
-                        }
-
-                        continue;
-                    }
-                }
-                else
-                {
-                    loginFailed(pool, i, false);
-                    continue;
-                }
-            }
-
-            std::cout << InformationMsg(formatPool(pool)) << WarningMsg("All login/connect attempts failed. Trying next pool.") << std::endl;
-        }
-
-        std::cout << InformationMsg(formatPool(m_allPools[0])) << WarningMsg("Failed to login/connect to all specified pools. Retrying first pool.") << std::endl;
-    }
-}
-
 Job PoolCommunication::getJob()
 {
     return m_currentJob;
@@ -354,25 +246,155 @@ void PoolCommunication::startManaging()
         m_managerThread.join();
     }
 
-    if (m_pingThread.joinable())
-    {
-        m_pingThread.join();
-    }
-
     m_shouldStop = false;
+    m_shouldFindNewPool = true;
 
     m_managerThread = std::thread(&PoolCommunication::managePools, this);
+}
 
-    m_pingThread = std::thread(&PoolCommunication::keepAlive, this);
+bool PoolCommunication::tryLogin(const Pool &pool)
+{
+    const auto socket = std::make_shared<sockwrapper::SocketWrapper>(
+        pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
+    );
+
+    std::stringstream stream;
+
+    std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Attempting to connect to pool...") << std::endl;
+
+    for (int i = 1; i <= Constants::MAX_LOGIN_ATTEMPTS; i++)
+    {
+        const bool success = socket->start();
+
+        if (!success)
+        {
+            loginFailed(pool, i, true);
+            continue;
+        }
+        
+        const nlohmann::json loginMsg = {
+            {"method", "login"},
+            {"params", {
+                {"login", pool.username},
+                {"pass", pool.password},
+                {"rigid", pool.rigID},
+                {"agent", pool.getAgent()}
+            }},
+            {"id", 1},
+            {"jsonrpc", "2.0"}
+        };
+
+        const auto res = socket->sendMessageAndGetResponse(loginMsg.dump() + "\n");
+
+        if (res)
+        {
+            try
+            {
+                const LoginMessage message = nlohmann::json::parse(*res);
+
+                std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Logged in.") << std::endl;
+                
+                if (m_socket)
+                {
+                    m_socket->stop();
+                }
+
+                m_socket = socket;
+                m_currentPool = pool;
+                m_currentPool.loginID = message.loginID;
+                m_currentJob = message.job;
+
+                if (*message.job.nonce() != 0)
+                {
+                    m_currentPool.niceHash = true;
+                }
+                
+                registerHandlers();
+
+                if (m_onPoolSwapped)
+                {
+                    m_onPoolSwapped(pool);
+                }
+
+                return true;
+
+            }
+            catch (const std::exception &)
+            {
+                try
+                {
+                    /* Failed to parse as LoginMessage. Maybe it's an error message? */
+                    const ErrorMessage message = nlohmann::json::parse(*res);
+                    loginFailed(pool, i, false, message.error.errorMessage);
+                }
+                catch (const std::exception &e)
+                {
+                    loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
+                }
+
+                continue;
+            }
+        }
+        else
+        {
+            loginFailed(pool, i, false);
+            continue;
+        }
+    }
+
+    std::cout << InformationMsg(formatPool(pool)) << WarningMsg("All login/connect attempts failed.") << std::endl;
+
+     return false;
 }
 
 void PoolCommunication::managePools()
 {
     while (!m_shouldStop)
     {
+        if (m_shouldFindNewPool) {
+            m_currentPoolIndex = m_allPools.size();
+        }
+
+        /* Most preferred pool = 0, current pool is = current pool index, so if we're
+           not connected to the most preferred pool, we step down the list, in
+           order of preference, trying to reconnect to each. */
+        for (int poolPreference = 0; poolPreference < m_currentPoolIndex; poolPreference++)
+        {
+            if (m_shouldStop)
+            {
+                return;
+            }
+
+            /* Grab the pool */
+            const auto pool = m_allPools[poolPreference];
+
+            /* Try and login */
+            const bool loginSuccess = tryLogin(pool);
+
+            if (loginSuccess)
+            {
+                /* Cool, got a more preferred pool. */
+                m_currentPoolIndex = poolPreference;
+                m_shouldFindNewPool = false;
+                break;
+            }
+        }
+
+        /* Still not found a pool. Go again. */
+        if (m_shouldFindNewPool)
+        {
+            continue;
+        }
+        else
+        {
+            keepAlive();
+        }
+
         std::unique_lock<std::mutex> lock(m_mutex);
 
-        m_findNewPool.wait(lock, [&]{
+        /* Nice, found a pool. Wait for the timeout, or for a pool to disconnect,
+           then we'll retry any possibly more preferred pools. */
+        m_findNewPool.wait_for(lock, std::chrono::seconds(5), [&]{
             if (m_shouldStop)
             {
                 return true;
@@ -380,36 +402,22 @@ void PoolCommunication::managePools()
 
             return m_shouldFindNewPool;
         });
-
-        if (m_shouldStop)
-        {
-            return;
-        }
-
-        login(false);
-
-        m_shouldFindNewPool = false;
     }
 }
 
 void PoolCommunication::keepAlive()
 {
-    while (!m_shouldStop)
-    {
-        Utilities::sleepUnlessStopping(std::chrono::seconds(5), m_shouldStop);
+    const nlohmann::json pingMsg = {
+        {"method", "keepalived"},
+        {"params", {
+            {"id", m_currentPool.loginID},
+            {"rigid", m_currentPool.rigID},
+            {"agent", m_currentPool.getAgent()},
+        }},
+        {"id", 1}
+    };
 
-        const nlohmann::json pingMsg = {
-            {"method", "keepalived"},
-            {"params", {
-                {"id", m_currentPool.loginID},
-                {"rigid", m_currentPool.rigID},
-                {"agent", m_currentPool.getAgent()},
-            }},
-            {"id", 1}
-        };
-
-        m_socket->sendMessage(pingMsg.dump() + "\n");
-    }
+    m_socket->sendMessage(pingMsg.dump() + "\n");
 }
 
 std::shared_ptr<IHashingAlgorithm> PoolCommunication::getMiningAlgorithm() const

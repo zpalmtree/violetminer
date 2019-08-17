@@ -57,30 +57,6 @@ void MinerManager::start()
 
     m_shouldStop = false;
 
-    /* Login to the pool */
-    m_pool->login(true);
-
-    /* Get the initial job to work on */
-    m_currentJob = m_pool->getJob();
-
-    m_pool->printPool();
-    std::cout << WhiteMsg("New job, diff ") << WhiteMsg(m_currentJob.shareDifficulty) << std::endl;
-
-    /* Set initial nonce */
-    m_nonce = m_distribution(m_gen);
-
-    /* Indicate that there's no new jobs available to other threads */
-    m_newJobAvailable = std::vector<bool>(m_threadCount, false);
-
-    /* Launch off the miner threads */
-    for (uint32_t i = 0; i < m_threadCount; i++)
-    {
-        m_threads.push_back(std::thread(&MinerManager::hash, this, i));
-    }
-
-    /* Launch off the thread to print stats regularly */
-    m_statsThread = std::thread(&MinerManager::printStats, this);
-
     /* Hook up the function to set a new job when it arrives */
     m_pool->onNewJob([this](const Job &job){
         setNewJob(job);
@@ -91,10 +67,12 @@ void MinerManager::start()
         m_hashManager.shareAccepted();
     });
 
+    /* Start mining when we connect to a pool */
     m_pool->onPoolSwapped([this](const Pool &newPool){
         resumeMining();
     });
 
+    /* Stop mining when we disconnect */
     m_pool->onPoolDisconnected([this](){
         pauseMining();
     });
@@ -105,7 +83,7 @@ void MinerManager::start()
 
 void MinerManager::resumeMining()
 {
-    if (!m_threads.empty() || m_statsThread.joinable())
+    if (!m_threads.empty())
     {
         pauseMining();
     }
