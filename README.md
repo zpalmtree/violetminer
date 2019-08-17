@@ -76,24 +76,11 @@ For 32-bit:
 - `cmake -G "Visual Studio 16 2019" -A Win32 ..`
 - `MSBuild violetminer.sln /p:Configuration=Release /p:Platform=Win32 /m` 
 
-### Ubuntu, using GCC
+### Linux
 
-- `sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y`
-- `sudo apt-get update`
-- `sudo apt-get install aptitude -y`
-- `sudo aptitude install -y build-essential g++-8 gcc-8 git python-pip libssl-dev`
-- `sudo pip install cmake`
-- `export CC=gcc-8`
-- `export CXX=g++-8`
-- `git clone https://github.com/turtlecoin/violetminer`
-- `cd violetminer`
-- `git submodule update --init --recursive`
-- `mkdir build`
-- `cd build`
-- `cmake ..`
-- `make`
+It's highly recommended to use Clang to compile. It gets better hashrate.
 
-### Ubuntu, using Clang
+#### Ubuntu, using Clang
 
 - `sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y`
 - `wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -`
@@ -123,7 +110,24 @@ You need to modify the below command for your version of ubuntu - see https://ap
 - `cmake ..`
 - `make`
 
-### Generic Linux
+#### Ubuntu, using GCC
+
+- `sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y`
+- `sudo apt-get update`
+- `sudo apt-get install aptitude -y`
+- `sudo aptitude install -y build-essential g++-8 gcc-8 git python-pip libssl-dev`
+- `sudo pip install cmake`
+- `export CC=gcc-8`
+- `export CXX=g++-8`
+- `git clone https://github.com/turtlecoin/violetminer`
+- `cd violetminer`
+- `git submodule update --init --recursive`
+- `mkdir build`
+- `cd build`
+- `cmake ..`
+- `make`
+
+#### Generic Linux
 
 - `git clone https://github.com/turtlecoin/violetminer`
 - `cd violetminer`
