@@ -18,6 +18,7 @@ If you prefer to compile yourself, read on. This can result in increased hashrat
 
 ## Notes
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
+* Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
 
 ## Example Config
 
@@ -30,21 +31,21 @@ Alternatively, copy and modify the following config to your purposes.
         {
             "agent": "",
             "algorithm": "turtlecoin",
-            "host": "127.0.0.1",
+            "host": "publicnode.ydns.eu",
             "niceHash": false,
             "password": "",
-            "port": 3333,
+            "port": 4666,
             "rigID": "",
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
-            "agent": "",
+            "agent": "violetminer-v0.0.3",
             "algorithm": "wrkzcoin",
-            "host": "127.0.0.1",
-            "niceHash": true,
-            "password": "",
-            "port": 5000,
-            "rigID": "",
+            "host": "139.162.29.140",
+            "niceHash": false,
+            "password": "x",
+            "port": 4444,
+            "rigID": "rig1",
             "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
         }
     ],
@@ -58,9 +59,11 @@ Alternatively, copy and modify the following config to your purposes.
 
 - Download the [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) Installer
 - When it opens up select **C++ build tools**, it automatically selects the needed parts
+<!---
 - Install the latest full version of OpenSSL if you want to compile with SSL support. (currently OpenSSL 1.1.1c). Select the appropriate version for your system:
   - [OpenSSL 64-bit](https://slproweb.com/download/Win64OpenSSL-1_1_1c.exe)
   - [OpenSSL 32-bit](https://slproweb.com/download/Win32OpenSSL-1_1_1c.exe)
+  -->
 
 For 64-bit:
 - From the start menu, open 'x64 Native Tools Command Prompt for VS 2019'.
