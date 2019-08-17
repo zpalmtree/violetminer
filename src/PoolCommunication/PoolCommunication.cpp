@@ -15,6 +15,7 @@
 #include "SocketWrapper/SocketWrapper.h"
 #include "Types/PoolMessage.h"
 #include "Utilities/ColouredMsg.h"
+#include "Utilities/Utilities.h"
 
 PoolCommunication::PoolCommunication(
     const std::vector<Pool> allPools):
@@ -81,6 +82,11 @@ void PoolCommunication::logout()
     {
         m_managerThread.join();
     }
+
+    if (m_pingThread.joinable())
+    {
+        m_pingThread.join();
+    }
 }
 
 void PoolCommunication::getNewJob()
@@ -123,11 +129,19 @@ void PoolCommunication::registerHandlers()
                     m_onNewJob(job->job);
                 }
             }
-            else if (auto shareAccepted = std::get_if<ShareAcceptedMessage>(&poolMessage))
+            else if (auto status = std::get_if<StatusMessage>(&poolMessage))
             {
-                if (shareAccepted->status == "OK" && m_onHashAccepted)
+                if (status->status == "OK" && m_onHashAccepted)
                 {
-                    m_onHashAccepted(shareAccepted->ID);
+                    m_onHashAccepted(status->ID);
+                }
+                else if (status->status == "KEEPALIVED")
+                {
+                    // kept alive
+                }
+                else
+                {
+                    std::cout << WarningMsg("Unknown status message: " + status->status);
                 }
             }
             else if (auto error = std::get_if<ErrorMessage>(&poolMessage))
@@ -340,9 +354,16 @@ void PoolCommunication::startManaging()
         m_managerThread.join();
     }
 
+    if (m_pingThread.joinable())
+    {
+        m_pingThread.join();
+    }
+
     m_shouldStop = false;
 
     m_managerThread = std::thread(&PoolCommunication::managePools, this);
+
+    m_pingThread = std::thread(&PoolCommunication::keepAlive, this);
 }
 
 void PoolCommunication::managePools()
@@ -368,6 +389,26 @@ void PoolCommunication::managePools()
         login(false);
 
         m_shouldFindNewPool = false;
+    }
+}
+
+void PoolCommunication::keepAlive()
+{
+    while (!m_shouldStop)
+    {
+        Utilities::sleepUnlessStopping(std::chrono::seconds(5), m_shouldStop);
+
+        const nlohmann::json pingMsg = {
+            {"method", "keepalived"},
+            {"params", {
+                {"id", m_currentPool.loginID},
+                {"rigid", m_currentPool.rigID},
+                {"agent", m_currentPool.getAgent()},
+            }},
+            {"id", 1}
+        };
+
+        m_socket->sendMessage(pingMsg.dump() + "\n");
     }
 }
 

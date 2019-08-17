@@ -64,6 +64,9 @@ class PoolCommunication
     /* Connect to pools when necessary */
     void managePools();
 
+    /* Keep the pool connection alive */
+    void keepAlive();
+
     void registerHandlers();
 
     /* Request the latest job from the pool */
@@ -105,6 +108,9 @@ class PoolCommunication
 
     /* Manages connecting to other pools */
     std::thread m_managerThread;
+
+    /* Keeps the connection alive */
+    std::thread m_pingThread;
 
     /* Handle stopping the manager thread */
     std::atomic<bool> m_shouldStop;

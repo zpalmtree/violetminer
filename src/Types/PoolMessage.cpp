@@ -10,7 +10,7 @@ std::variant<
     JobMessage,
     ErrorMessage,
     LoginMessage,
-    ShareAcceptedMessage
+    StatusMessage
 > parsePoolMessage(const std::string &message)
 {
     try
@@ -24,7 +24,7 @@ std::variant<
 
     try
     {
-        const ShareAcceptedMessage result = nlohmann::json::parse(message);
+        const StatusMessage result = nlohmann::json::parse(message);
         return result;
     }
     catch (const std::exception &)

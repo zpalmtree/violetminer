@@ -94,12 +94,12 @@ struct LoginMessage : PoolMessage
     Job job;
 };
 
-struct ShareAcceptedMessage : PoolMessage
+struct StatusMessage : PoolMessage
 {
-    /* The same id we sent in the submission message */
+    /* The same id we sent in the submission/keep alive message */
     std::string ID;
 
-    /* Whether the operation succeeded */
+    /* The status type, OK for share accepted, KEEPALIVED for keepalived */
     std::string status;
 };
 
@@ -233,7 +233,7 @@ inline void from_json(const nlohmann::json &j, ErrorMessage &e)
     e.error = j.at("error").get<PoolError>();
 }
 
-inline void from_json(const nlohmann::json &j, ShareAcceptedMessage &s)
+inline void from_json(const nlohmann::json &j, StatusMessage &s)
 {
     from_json(j, static_cast<PoolMessage &>(s));
 
@@ -255,5 +255,5 @@ std::variant<
     JobMessage,
     ErrorMessage,
     LoginMessage,
-    ShareAcceptedMessage
+    StatusMessage
 > parsePoolMessage(const std::string &message);
