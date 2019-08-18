@@ -8,6 +8,7 @@
 #include <thread>
 
 #include "Types/Pool.h"
+#include "Argon2/Constants.h"
 
 struct MinerConfig
 {
@@ -17,7 +18,7 @@ struct MinerConfig
 
     std::string configLocation;
 
-    std::string optimizationMethod;
+    Constants::OptimizationMethod optimizationMethod;
 
     bool interactive = false;
 };
@@ -26,9 +27,9 @@ void to_json(nlohmann::json &j, const MinerConfig &config);
 
 void from_json(const nlohmann::json &j, MinerConfig &config);
 
-std::vector<std::string> getAvailableOptimizations();
+std::vector<Constants::OptimizationMethod> getAvailableOptimizations();
 
-std::string getBestAvailableOptimization();
+Constants::OptimizationMethod getBestAvailableOptimization();
 
 Pool getPool();
 

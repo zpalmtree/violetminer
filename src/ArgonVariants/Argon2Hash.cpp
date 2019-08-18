@@ -6,6 +6,8 @@
 #include "ArgonVariants/Argon2Hash.h"
 /////////////////////////////////////
 
+#include "Config/Config.h"
+
 void Argon2Hash::init(std::vector<uint8_t> &initialInput)
 {
     return;
@@ -28,7 +30,7 @@ Argon2Hash::Argon2Hash(
     const uint32_t threads,
     const uint32_t saltLength,
     const Constants::ArgonVariant variant):
-    m_argonInstance(variant, {}, {}, iterations, memoryKB, threads, 32),
+    m_argonInstance(variant, {}, {}, iterations, memoryKB, threads, 32, Config::config.optimizationMethod),
     m_saltLength(saltLength)
 {
 }

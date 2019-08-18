@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include "Argon2/Constants.h"
+
 namespace Config
 {
     class Config
@@ -11,7 +13,7 @@ namespace Config
       public:
         Config() {};
 
-        std::string optimizationMethod;
+        Constants::OptimizationMethod optimizationMethod;
     };
 
     extern Config config;

@@ -45,11 +45,11 @@ void printWelcomeHeader(MinerConfig config)
 
     static const cpu_features::X86Features features = cpu_features::GetX86Info().features;
 
-    std::vector<std::tuple<std::string, bool>> availableOptimizations = {
-        { "AVX-512", features.avx512f },
-        { "AVX-2", features.avx2 },
-        { "SSE3", features.sse3 },
-        { "SSE2", features.sse2 }
+    std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations = {
+        { Constants::AVX512, features.avx512f },
+        { Constants::AVX2, features.avx2 },
+        { Constants::SSE3, features.sse3 },
+        { Constants::SSE2, features.sse2 }
     };
 
     std::cout << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25);
@@ -58,24 +58,24 @@ void printWelcomeHeader(MinerConfig config)
     {
         if (enabled)
         {
-            std::cout << SuccessMsg(optimization + " ");
+            std::cout << SuccessMsg(Constants::optimizationMethodToString(optimization) + " ");
         }
         else
         {
-            std::cout << WarningMsg(optimization + " ");
+            std::cout << WarningMsg(Constants::optimizationMethodToString(optimization) + " ");
         }
     }
 #endif
 
     std::cout << std::endl << InformationMsg("* ") << WhiteMsg("CHOSEN OPTIMIZATION", 25);
     
-    if (config.optimizationMethod != "None")
+    if (config.optimizationMethod != Constants::NONE)
     {
-        std::cout << SuccessMsg(config.optimizationMethod) << std::endl;
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
     }
     else
     {
-        std::cout << WarningMsg("None") << std::endl;
+        std::cout << WarningMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
     }
 
     std::cout << std::endl;

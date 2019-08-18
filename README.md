@@ -20,13 +20,17 @@ If you prefer to compile yourself, read on. This can result in increased hashrat
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
 * Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
 
-## Example Config
+## Configuring
 
-Simply go through the normal setup and a config will be written to `config.json` on completion.
-Alternatively, copy and modify the following config to your purposes.
+There are a couple of ways to configure the miner.
+
+* Just start it, and walk throught the guided setup. Upon completion, the config will be written to `config.json` for modification.
+* Use command line options. Use `violetminer --help` to list them all. It is not recommended to use command line options, as they are less configurable than the config.
+* Copy the below config to `config.json` and modify to your purposes.
 
 ```
 {
+    "optimizationMethod": "Auto",
     "pools": [
         {
             "agent": "",
@@ -48,10 +52,39 @@ Alternatively, copy and modify the following config to your purposes.
             "rigID": "rig1",
             "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
         }
+
     ],
     "threadCount": 12
 }
 ```
+
+### Optimization method
+
+By default, the program will automatically choose the optimization method to use.
+
+In some cases, you may find you get better performance by manually specifying the optimization method to use.
+
+You can, if desired, use a different optimization method, or disable optimizations altogether.
+
+Note that you can only use optimizations that your hardware has support for - these are printed at startup.
+
+Simply set the desired value in the `optimizationMethod` config field.
+
+Available optimizations for each platform are as follows:
+
+#### x86_64 (64 bit Intel/AMD Windows/Mac/Linux)
+
+* `AVX-512`
+* `AVX-2`
+* `SSE3`
+* `SSE2`
+* `None`
+* `Auto`
+
+#### Anything else
+
+* `None`
+* `Auto`
 
 ## Compiling
 

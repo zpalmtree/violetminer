@@ -25,7 +25,7 @@ void to_json(nlohmann::json &j, const MinerConfig &config)
     j = {
         {"threadCount", config.threadCount},
         {"pools", config.pools},
-        {"optimizationMethod", config.optimizationMethod}
+        {"optimizationMethod", Constants::optimizationMethodToString(config.optimizationMethod)}
     };
 }
 
@@ -42,24 +42,24 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     {
         const auto optimizations = getAvailableOptimizations();
 
-        config.optimizationMethod = j.at("optimizationMethod").get<std::string>();
+        config.optimizationMethod = Constants::optimizationMethodFromString(j.at("optimizationMethod").get<std::string>());
 
         const auto it = std::find(optimizations.begin(), optimizations.end(), config.optimizationMethod);
 
         if (it == optimizations.end())
         {
-            throw std::invalid_argument("Optimization " + config.optimizationMethod + " is either unknown, or unavailable for your hardware.");
+            throw std::invalid_argument("Optimization " + Constants::optimizationMethodToString(config.optimizationMethod) + " is unavailable for your hardware.");
         }
     }
     else
     {
-        config.optimizationMethod = getBestAvailableOptimization();
+        config.optimizationMethod = Constants::AUTO;
     }
 }
 
-std::vector<std::string> getAvailableOptimizations()
+std::vector<Constants::OptimizationMethod> getAvailableOptimizations()
 {
-    std::vector<std::string> availableOptimizations;
+    std::vector<Constants::OptimizationMethod> availableOptimizations;
 
     #if defined(X86_OPTIMIZATIONS)
 
@@ -67,34 +67,30 @@ std::vector<std::string> getAvailableOptimizations()
 
     if (features.avx512f)
     {
-        availableOptimizations.push_back("AVX-512");
+        availableOptimizations.push_back(Constants::AVX512);
     }
 
     if (features.avx2)
     {
-        availableOptimizations.push_back("AVX2");
+        availableOptimizations.push_back(Constants::AVX2);
     }
 
     if (features.sse3)
     {
-        availableOptimizations.push_back("SSE3");
+        availableOptimizations.push_back(Constants::SSE3);
     }
 
     if (features.sse2)
     {
-        availableOptimizations.push_back("SSE2");
+        availableOptimizations.push_back(Constants::SSE2);
     }
 
     #endif
 
-    availableOptimizations.push_back("None");
+    availableOptimizations.push_back(Constants::AUTO);
+    availableOptimizations.push_back(Constants::NONE);
     
     return availableOptimizations;
-}
-
-std::string getBestAvailableOptimization()
-{
-    return getAvailableOptimizations()[0];
 }
 
 Pool getPool()
@@ -246,7 +242,7 @@ MinerConfig getConfigInteractively()
     MinerConfig config;
 
     config.pools = getPools();
-    config.optimizationMethod = getBestAvailableOptimization();
+    config.optimizationMethod = Constants::AUTO;
     config.interactive = true;
 
     std::ofstream configFile(Constants::CONFIG_FILE_NAME);
