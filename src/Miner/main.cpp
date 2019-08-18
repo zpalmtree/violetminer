@@ -128,14 +128,20 @@ int main(int argc, char **argv)
     }
     else
     {
+        std::random_device device;
+        std::mt19937 rng(device());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(10, 60);
+
+        /* Start mining for the user */
+        userMinerManager.start();
+
         /* 100 minute rounds, alternating between users pool and devs pool */
         while (true)
         {
-            /* Start mining for the user */
-            userMinerManager.start();
+            /* Mine for the user for between 10 and 60 minutes before swapping to the dev pool */
+            auto userMiningFirstHalf = std::chrono::minutes(dist(rng));
 
-            /* Mine for userMiningTime minutes */
-            std::this_thread::sleep_for(userMiningTime);
+            std::this_thread::sleep_for(userMiningFirstHalf);
 
             /* Stop mining for the user */
             userMinerManager.stop();
@@ -153,6 +159,12 @@ int main(int argc, char **argv)
             devMinerManager.stop();
 
             std::cout << InformationMsg("=== Regular mining resumed. Thank you for supporting violetminer! ===") << std::endl;
+
+            /* Start mining for the user */
+            userMinerManager.start();
+
+            /* Then mine for the remaining 90 to 40 minutes on the user pool again */
+            std::this_thread::sleep_for(userMiningTime - userMiningFirstHalf);
         }
     }
 }
