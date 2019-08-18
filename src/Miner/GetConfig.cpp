@@ -75,9 +75,14 @@ std::vector<Constants::OptimizationMethod> getAvailableOptimizations()
         availableOptimizations.push_back(Constants::AVX2);
     }
 
-    if (features.sse3)
+    if (features.sse4_1)
     {
-        availableOptimizations.push_back(Constants::SSE3);
+        availableOptimizations.push_back(Constants::SSE41);
+    }
+
+    if (features.ssse3)
+    {
+        availableOptimizations.push_back(Constants::SSSE3);
     }
 
     if (features.sse2)

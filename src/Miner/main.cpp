@@ -48,7 +48,8 @@ void printWelcomeHeader(MinerConfig config)
     std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations = {
         { Constants::AVX512, features.avx512f },
         { Constants::AVX2, features.avx2 },
-        { Constants::SSE3, features.sse3 },
+        { Constants::SSE41, features.sse4_1 },
+        { Constants::SSSE3, features.ssse3 },
         { Constants::SSE2, features.sse2 }
     };
 

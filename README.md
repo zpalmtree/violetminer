@@ -82,7 +82,8 @@ Available optimizations for each platform are as follows:
 
 * `AVX-512`
 * `AVX-2`
-* `SSE3`
+* `SSE4.1`
+* `SSSE3`
 * `SSE2`
 * `None`
 * `Auto`
