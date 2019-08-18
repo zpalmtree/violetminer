@@ -439,6 +439,7 @@ MinerConfig getMinerConfig(int argc, char **argv)
             poolConfig.algorithmGenerator = it->second;
 
             config.pools.push_back(poolConfig);
+            config.optimizationMethod = Constants::AUTO;
 
             return config;
         }
