@@ -1,10 +1,16 @@
 # violetminer
 
-![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/640px-Argon_discharge_tube.jpg)
+![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/500px-Argon_discharge_tube.jpg)
 
 A CPU miner for Argon2i, Argon2d, and Argon2id.
 
+#### Master Build Status
+
 [![Build Status](https://travis-ci.org/turtlecoin/violetminer.svg?branch=master)](https://travis-ci.org/turtlecoin/violetminer)
+
+#### Development Build Status
+
+[![Build Status](https://travis-ci.org/turtlecoin/violetminer.svg?branch=development)](https://travis-ci.org/turtlecoin/violetminer)
 
 ## Download
 
