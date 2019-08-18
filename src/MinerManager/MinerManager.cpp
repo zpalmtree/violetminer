@@ -146,7 +146,7 @@ void MinerManager::stop()
 {
     m_shouldStop = true;
 
-    for (int i = 0; i < m_threadCount; i++)
+    for (int i = 0; i < m_newJobAvailable.size(); i++)
     {
         m_newJobAvailable[i] = true;
     }
@@ -170,7 +170,10 @@ void MinerManager::stop()
     }
 
     /* Close the socket connection to the pool */
-    m_pool->logout();
+    if (m_pool)
+    {
+        m_pool->logout();
+    }
 }
 
 void MinerManager::hash(uint32_t threadNumber)

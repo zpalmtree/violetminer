@@ -76,7 +76,10 @@ void PoolCommunication::logout()
 
     m_findNewPool.notify_all();
 
-    m_socket->stop();
+    if (m_socket)
+    {
+        m_socket->stop();
+    }
 
     if (m_managerThread.joinable())
     {
