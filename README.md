@@ -36,7 +36,7 @@ There are a couple of ways to configure the miner.
 * Use command line options. Use `violetminer --help` to list them all. It is not recommended to use command line options, as they are less configurable than the config.
 * Copy the below config to `config.json` and modify to your purposes.
 
-```
+```json
 {
     "optimizationMethod": "Auto",
     "pools": [
@@ -211,4 +211,4 @@ Set this depending on the architecture of the phone you want to run it on.
 
 ## Developing
 
-* Update submodules to lastest commit: `git submodule foreach git pull origin master`
+* Update submodules to latest commit: `git submodule foreach git pull origin master`
