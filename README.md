@@ -25,6 +25,7 @@ If you prefer to compile yourself, read on. This can result in increased hashrat
 ## Notes
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
 * Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
+* Supports AVX-512, AVX-2, SSE4.1, SSSE3 and SSE2 optimizations
 * Dev fee is 1%.
 
 ## Configuring
