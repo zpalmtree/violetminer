@@ -29,7 +29,7 @@ void from_json(const nlohmann::json &j, MinerConfig &config);
 
 std::vector<Constants::OptimizationMethod> getAvailableOptimizations();
 
-Constants::OptimizationMethod getBestAvailableOptimization();
+Constants::OptimizationMethod getAutoChosenOptimization();
 
 Pool getPool();
 

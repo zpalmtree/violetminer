@@ -18,6 +18,8 @@
 
 #if defined(X86_OPTIMIZATIONS)
 #include "cpu_features/include/cpuinfo_x86.h"
+#elif defined(ARMV7_OPTIMIZATIONS)
+#include "cpu_features/include/cpuinfo_arm.h"
 #endif
 
 void to_json(nlohmann::json &j, const MinerConfig &config)
@@ -57,6 +59,18 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     }
 }
 
+Constants::OptimizationMethod getAutoChosenOptimization()
+{
+    auto best = getAvailableOptimizations()[0];
+
+    if (best == Constants::AUTO)
+    {
+        best = Constants::NONE;
+    }
+
+    return best;
+}
+
 std::vector<Constants::OptimizationMethod> getAvailableOptimizations()
 {
     std::vector<Constants::OptimizationMethod> availableOptimizations;
@@ -89,6 +103,19 @@ std::vector<Constants::OptimizationMethod> getAvailableOptimizations()
     {
         availableOptimizations.push_back(Constants::SSE2);
     }
+
+    #elif defined(ARMV7_OPTIMIZATIONS)
+
+    static const cpu_features::ArmFeatures features = cpu_features::GetArmInfo().features;
+    
+    if (features.neon)
+    {
+        availableOptimizations.push_back(Constants::NEON);
+    }
+
+    #elif defined(ARMV8_OPTIMIZATIONS)
+
+    availableOptimizations.push_back(Constants::NEON);
 
     #endif
 

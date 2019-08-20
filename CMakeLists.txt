@@ -37,6 +37,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+set(FORCE_ARCH "" CACHE STRING "Force the architecture to the specific string")
+
 # Add custom modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/Argon2/src/Intrinsics")
 
@@ -46,8 +48,15 @@ target_architecture(ARCH)
 
 if("${ARCH}" STREQUAL "x86_64")
     add_definitions(-DX86_OPTIMIZATIONS)
+elseif("${ARCH}" STREQUAL "armv8")
+    add_definitions(-DARM_OPTIMIZATIONS)
+    add_definitions(-DARMV8_OPTIMIZATIONS)
+elseif("${ARCH}" STREQUAL "armv7")
+    add_definitions(-DARM_OPTIMIZATIONS)
+    add_definitions(-DARMV7_OPTIMIZATIONS)
+elseif("${ARCH}" STREQUAL "arm")
+    add_definitions(-DARM_OPTIMIZATIONS)
 else()
-    message(STATUS "Using cross platform code")
     add_definitions(-DNO_OPTIMIZATIONS)
 endif()
 

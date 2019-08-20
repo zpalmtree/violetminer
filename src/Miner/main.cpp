@@ -15,6 +15,8 @@
 
 #if defined(X86_OPTIMIZATIONS)
 #include "cpu_features/include/cpuinfo_x86.h"
+#elif defined(ARMV7_OPTIMIZATIONS)
+#include "cpu_features/include/cpuinfo_arm.h"
 #endif
 
 std::vector<Pool> getDevPools()
@@ -36,16 +38,17 @@ std::vector<Pool> getDevPools()
 
 void printWelcomeHeader(MinerConfig config)
 {
-    std::cout << InformationMsg("* ") << WhiteMsg("ABOUT", 25) << InformationMsg("violetminer " + Constants::VERSION) << std::endl;
-    std::cout << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.threadCount) << std::endl;
+    std::cout << InformationMsg("* ") << WhiteMsg("ABOUT", 25) << InformationMsg("violetminer " + Constants::VERSION) << std::endl
+              << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.threadCount) << std::endl
+              << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25);
 
-#if defined(NO_OPTIMIZATIONS)
-    std::cout << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25) << WarningMsg("No optimizations available on this platform");
-#elif defined(X86_OPTIMIZATIONS)
+    std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations;
+
+#if defined(X86_OPTIMIZATIONS)
 
     static const cpu_features::X86Features features = cpu_features::GetX86Info().features;
 
-    std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations = {
+    availableOptimizations = {
         { Constants::AVX512, features.avx512f },
         { Constants::AVX2, features.avx2 },
         { Constants::SSE41, features.sse4_1 },
@@ -53,7 +56,19 @@ void printWelcomeHeader(MinerConfig config)
         { Constants::SSE2, features.sse2 }
     };
 
-    std::cout << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25);
+#elif defined(ARMV8_OPTIMIZATIONS)
+    
+    availableOptimizations = { { Constants::NEON, true} }; /* All ARMv8 cpus have NEON optimizations */
+
+#elif defined(ARMV7_OPTIMIZATIONS)
+
+    static const cpu_features::ArmFeatures features = cpu_features::GetArmInfo().features;
+
+    availableOptimizations = { { Constants::NEON, features.neon } };
+
+#else
+    availableOptimizations = {{ Constants::NONE, false } };
+#endif
 
     for (const auto &[optimization, enabled] : availableOptimizations)
     {
@@ -66,11 +81,25 @@ void printWelcomeHeader(MinerConfig config)
             std::cout << WarningMsg(Constants::optimizationMethodToString(optimization) + " ");
         }
     }
-#endif
 
     std::cout << std::endl << InformationMsg("* ") << WhiteMsg("CHOSEN OPTIMIZATION", 25);
     
-    if (config.optimizationMethod != Constants::NONE)
+    if (config.optimizationMethod == Constants::AUTO)
+    {
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.optimizationMethod));
+
+        const auto optimization = getAutoChosenOptimization();
+
+        if (optimization == Constants::NONE)
+        {
+            std::cout << WarningMsg(" (" + Constants::optimizationMethodToString(optimization) + ")") << std::endl;
+        }
+        else
+        {
+            std::cout << SuccessMsg(" (" + Constants::optimizationMethodToString(optimization) + ")") << std::endl;
+        }
+    }
+    else if (config.optimizationMethod != Constants::NONE)
     {
         std::cout << SuccessMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
     }
