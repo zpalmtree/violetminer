@@ -68,6 +68,14 @@ Constants::OptimizationMethod getAutoChosenOptimization()
         best = Constants::NONE;
     }
 
+    #if defined(ARMV8_OPTIMIZATIONS)
+    /* We don't enable NEON optimizations by default on Armv8: https://github.com/weidai11/cryptopp/issues/367 */
+    if (best == Constants::NEON)
+    {
+        best = Constants::NONE;
+    }
+    #endif
+
     return best;
 }
 
