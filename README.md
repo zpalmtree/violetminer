@@ -23,10 +23,11 @@ If you prefer to compile yourself, read on. This can result in increased hashrat
 * WrkzCoin - choose `wrkzcoin` or `chukwa_wrkz`
 
 ## Notes
-* Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
+
+* Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations
 * Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
-* Supports AVX-512, AVX-2, SSE4.1, SSSE3 and SSE2 optimizations
 * Dev fee is 1%.
+* Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
 
 ## Configuring
 
@@ -90,6 +91,14 @@ Available optimizations for each platform are as follows:
 * `None`
 * `Auto`
 
+#### ARM
+
+Note: On ARMv8, `Auto` uses no optimizations. From my testing, the NEON implementation actually performs worse than the reference implementation. You may want to experiment with toggling between `NEON` and `None` if you are on an ARM machine.
+
+* `NEON`
+* `None`
+* `Auto`
+
 #### Anything else
 
 * `None`
@@ -129,7 +138,9 @@ For 32-bit:
 
 ### Linux
 
-It's highly recommended to use Clang to compile. It gets better hashrate.
+**It's highly recommended to use Clang to compile. It gets better hashrate for many people.**
+
+For example, I get 7300h/s with GCC, and 10200h/s with Clang on a Ryzen 1600.
 
 #### Ubuntu, using Clang
 
@@ -179,6 +190,8 @@ You need to modify the below command for your version of ubuntu - see https://ap
 - `make`
 
 #### Generic Linux
+
+Reminder to use clang if possible. Make sure to set `CC` and `CXX` to point to `clang` and `clang++` as seen in the Ubuntu instructions.
 
 - `git clone https://github.com/turtlecoin/violetminer`
 - `cd violetminer`
