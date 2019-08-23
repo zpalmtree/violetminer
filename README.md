@@ -138,9 +138,11 @@ For 32-bit:
 
 ### Linux
 
-**It's highly recommended to use Clang to compile. It gets better hashrate for many people.**
+**If you are on x86-64 (If you're not sure, you almost certainly are) It's highly recommended to use Clang to compile. It gets better hashrate for many people.**
 
 For example, I get 7300h/s with GCC, and 10200h/s with Clang on a Ryzen 1600.
+
+If you're on ARM however, GCC gets slightly better hashrate.
 
 #### Ubuntu, using Clang
 
