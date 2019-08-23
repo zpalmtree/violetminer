@@ -24,7 +24,7 @@ If you prefer to compile yourself, read on. This can result in increased hashrat
 
 ## Notes
 
-* Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations
+* Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations.
 * Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
 * Dev fee is 1%.
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
@@ -91,7 +91,7 @@ Available optimizations for each platform are as follows:
 * `None`
 * `Auto`
 
-#### ARM
+#### ARMv8
 
 Note: On ARMv8, `Auto` uses no optimizations. From my testing, the NEON implementation actually performs worse than the reference implementation. You may want to experiment with toggling between `NEON` and `None` if you are on an ARM machine.
 

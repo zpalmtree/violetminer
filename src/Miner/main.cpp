@@ -15,8 +15,6 @@
 
 #if defined(X86_OPTIMIZATIONS)
 #include "cpu_features/include/cpuinfo_x86.h"
-#elif defined(ARMV7_OPTIMIZATIONS)
-#include "cpu_features/include/cpuinfo_arm.h"
 #endif
 
 std::vector<Pool> getDevPools()
@@ -57,15 +55,7 @@ void printWelcomeHeader(MinerConfig config)
     };
 
 #elif defined(ARMV8_OPTIMIZATIONS)
-    
     availableOptimizations = { { Constants::NEON, true} }; /* All ARMv8 cpus have NEON optimizations */
-
-#elif defined(ARMV7_OPTIMIZATIONS)
-
-    static const cpu_features::ArmFeatures features = cpu_features::GetArmInfo().features;
-
-    availableOptimizations = { { Constants::NEON, features.neon } };
-
 #else
     availableOptimizations = {{ Constants::NONE, false } };
 #endif
