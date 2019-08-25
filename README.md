@@ -120,12 +120,13 @@ Note: On ARMv8, `Auto` uses no optimizations. From my testing, the NEON implemen
 
 For 64-bit:
 - From the start menu, open 'x64 Native Tools Command Prompt for VS 2019'.
+- `cd C:/` (Or your directory of choice)
 - `git clone https://github.com/turtlecoin/violetminer`
 - `cd violetminer`
 - `git submodule update --init --recursive`
 - `mkdir build`
 - `cd build`
-- `cmake -G "Visual Studio 16 2019" -A x64`
+- `cmake -G "Visual Studio 16 2019" -A x64 ..`
 - `MSBuild violetminer.sln /p:Configuration=Release /m`
 
 For 32-bit:
