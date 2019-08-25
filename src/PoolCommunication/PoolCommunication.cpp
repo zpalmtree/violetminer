@@ -17,10 +17,15 @@
 #include "Utilities/ColouredMsg.h"
 #include "Utilities/Utilities.h"
 
-PoolCommunication::PoolCommunication(
-    const std::vector<Pool> allPools):
-    m_allPools(allPools)
+PoolCommunication::PoolCommunication(std::vector<Pool> allPools)
 {
+    /* Sort pools based on their priority */
+    std::sort(allPools.begin(), allPools.end(), [](const auto a, const auto b)
+    {
+        return a.priority < b.priority;
+    });
+
+    m_allPools = allPools;
 }
 
 std::string formatPool(const Pool pool)
