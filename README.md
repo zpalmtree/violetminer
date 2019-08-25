@@ -46,10 +46,10 @@ There are a couple of ways to configure the miner.
         {
             "agent": "",
             "algorithm": "turtlecoin",
-            "host": "publicnode.ydns.eu",
+            "host": "pool.turtlecoin.dev",
             "niceHash": false,
             "password": "",
-            "port": 4666,
+            "port": 5555,
             "rigID": "",
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
