@@ -17,7 +17,7 @@ namespace Constants
     const float DEV_FEE_PERCENT = 1.0;
 
     /* Program version */
-    const std::string VERSION = "v0.0.5";
+    const std::string VERSION = "v0.0.6";
 
     /* Name of config file to look for */
     const std::string CONFIG_FILE_NAME = "config.json";
