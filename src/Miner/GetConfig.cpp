@@ -249,9 +249,12 @@ std::vector<Pool> getPools()
 {
     std::vector<Pool> pools;
 
+    int i = 0;
+
     while (true)
     {
-        const Pool pool = getPool();
+        Pool pool = getPool();
+        pool.priority = i;
 
         pools.push_back(pool);
 
@@ -261,6 +264,8 @@ std::vector<Pool> getPools()
         }
 
         std::cout << std::endl;
+
+        i++;
     }
 
     return pools;
@@ -276,11 +281,18 @@ MinerConfig getConfigInteractively()
 
     std::ofstream configFile(Constants::CONFIG_FILE_NAME);
 
+    nlohmann::json j = config;
+
     if (configFile)
     {
-        nlohmann::json j = config;
         configFile << j.dump(4) << std::endl;
         std::cout << SuccessMsg("Wrote config file to " + Constants::CONFIG_FILE_NAME) << std::endl;
+    }
+    else
+    {
+        std::cout << WarningMsg("Failed to write config to disk. Please check that the program can write to the folder you launched it from.")
+                  << std::endl << std::endl
+                  << "Config:" << std::endl << j.dump(4) << std::endl;
     }
 
     return config;

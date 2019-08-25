@@ -15,12 +15,15 @@
 struct Pool
 {
     /* Host of the pool */
+    /* Required */
     std::string host;
 
     /* Port of the pool */
+    /* Required */
     uint16_t port;
 
     /* Username to login with */
+    /* Required */
     std::string username;
 
     /* Optional password to login with */
@@ -30,6 +33,7 @@ struct Pool
     std::string rigID;
 
     /* The mining algorithm to use with this pool */
+    /* Required */
     std::string algorithm;
 
     /* Custom user agent */
@@ -40,6 +44,9 @@ struct Pool
 
     /* Whether to use nicehash style nonces */
     bool niceHash = false;
+
+    /* The priority of this pool in the list of pools */
+    size_t priority = 0;
 
     /* Gets an instance of the mining algorithm used for this pool */
     std::function<std::shared_ptr<IHashingAlgorithm>(void)> algorithmGenerator;
@@ -60,7 +67,8 @@ inline void to_json(nlohmann::json &j, const Pool &pool)
         {"rigID", pool.rigID},
         {"algorithm", pool.algorithm},
         {"agent", pool.agent},
-        {"niceHash", pool.niceHash}
+        {"niceHash", pool.niceHash},
+        {"priority", pool.priority}
     };
 }
 
@@ -99,5 +107,10 @@ inline void from_json(const nlohmann::json &j, Pool &pool)
     if (j.find("niceHash") != j.end())
     {
         pool.niceHash = j.at("niceHash").get<bool>();
+    }
+
+    if (j.find("priority") != j.end())
+    {
+        pool.priority = j.at("priority").get<size_t>();
     }
 }
