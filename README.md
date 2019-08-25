@@ -27,7 +27,8 @@ Want the miner to support another argon coin? Open an issue, or even better, ope
 ## Notes
 
 * Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations.
-* Pools are tried top to bottom, the lower a pool, the lower it's priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
+* You can set a priority to a pool to determine which ones are tried first. A smaller priority number means we will connect to it first. 0 = highest priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
+
 * Dev fee is 1%.
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
 
@@ -57,7 +58,8 @@ For example:
             "password": "",
             "port": 5555,
             "rigID": "",
-            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW",
+            "priority": 0
         },
         {
             "agent": "violetminer-v0.0.3",
@@ -67,7 +69,8 @@ For example:
             "password": "x",
             "port": 3420,
             "rigID": "rig1",
-            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
+            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7",
+            "priority": 1
         }
 
     ],
