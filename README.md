@@ -35,8 +35,14 @@ Want the miner to support another argon coin? Open an issue, or even better, ope
 
 There are a couple of ways to configure the miner.
 
-* Just start it, and walk throught the guided setup. Upon completion, the config will be written to `config.json` for modification.
-* Use command line options. Use `violetminer --help` to list them all. It is not recommended to use command line options, as they are less configurable than the config.
+* Just start it, and walk throught the guided setup. Upon completion, the config will be written to `config.json` for modification if desired.
+* Use command line options. Use `violetminer --help` to list them all. It is not recommended to use command line options, as they are less configurable than the config. Only `--algorithm`, `--pool`, and `--username` are mandatory.
+
+For example:
+```
+./violetminer --algorithm turtlecoin --pool pool.turtlecoin.dev:5555 --username TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW
+```
+
 * Copy the below config to `config.json` and modify to your purposes.
 
 ```json
