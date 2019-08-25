@@ -114,5 +114,5 @@ class PoolCommunication
     std::mutex m_mutex;
 
     /* Which pool are we mining on? 0 = most preferred */
-    uint32_t m_currentPoolIndex;
+    size_t m_currentPoolIndex;
 };

@@ -119,7 +119,7 @@ void MinerManager::pauseMining()
 
     m_shouldStop = true;
 
-    for (int i = 0; i < m_threadCount; i++)
+    for (uint32_t i = 0; i < m_threadCount; i++)
     {
         m_newJobAvailable[i] = true;
     }

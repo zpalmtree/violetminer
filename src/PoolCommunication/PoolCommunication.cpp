@@ -361,7 +361,7 @@ void PoolCommunication::managePools()
         /* Most preferred pool = 0, current pool is = current pool index, so if we're
            not connected to the most preferred pool, we step down the list, in
            order of preference, trying to reconnect to each. */
-        for (int poolPreference = 0; poolPreference < m_currentPoolIndex; poolPreference++)
+        for (size_t poolPreference = 0; poolPreference < m_currentPoolIndex; poolPreference++)
         {
             if (m_shouldStop)
             {
