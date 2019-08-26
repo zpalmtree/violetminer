@@ -119,6 +119,9 @@ void MinerManager::pauseMining()
 
     m_shouldStop = true;
 
+    /* Pause the hashrate calculator */
+    m_hashManager.pause();
+
     for (uint32_t i = 0; i < m_threadCount; i++)
     {
         m_newJobAvailable[i] = true;
@@ -145,6 +148,9 @@ void MinerManager::pauseMining()
 void MinerManager::stop()
 {
     m_shouldStop = true;
+
+    /* Pause the hashrate calculator */
+    m_hashManager.pause();
 
     for (int i = 0; i < m_newJobAvailable.size(); i++)
     {
@@ -243,6 +249,8 @@ void MinerManager::hash(uint32_t threadNumber)
 
 void MinerManager::printStats()
 {
+    m_hashManager.start();
+
     while (!m_shouldStop)
     {
         Utilities::sleepUnlessStopping(std::chrono::seconds(20), m_shouldStop);

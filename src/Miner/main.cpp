@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
     if (Constants::DEV_FEE_PERCENT == 0)
     {
-        std::cout << WarningMsg("Dev fee disabled :( Consider making a one off donation to TRTLv1c5XpYGdwHbcU94foRojzLiz3pQ4AJN6swsy514QrydgvYPCKhDZPt61JG5eVGJKrHsXJHSUHDmAhZ134q8QRN2kJwUbtB") << std::endl;
+        std::cout << WarningMsg("Dev fee disabled :( Consider making a one off donation to TRTLv1vC1ptGWbaGCCE5qQXaoJLDzuxEM8NiLDaUECE1Nz5FHEPiv9i7Eh57NaGhYJhKP2ep3Z6Q6NsudcNaoS9HDJBfTfX1e1N") << std::endl;
 
         /* No dev fee, just start the users mining */
         userMinerManager.start();

@@ -27,6 +27,12 @@ class HashManager
 
     /* Print the current stats */
     void printStats();
+
+    /* Pause hashrate monitoring */
+    void pause();
+
+    /* Start hashrate monitoring */
+    void start();
     
   private:
     /* Total number of hashes we have performed */
@@ -40,6 +46,14 @@ class HashManager
 
     const std::shared_ptr<PoolCommunication> m_pool;
 
-    /* TODO: Hashrate will break when the dev pool pauses this timer. */
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_startTime;
+    /* The effective time we started mining. When we start/stop, we alter this
+       based on when we stopped. So, taking now() - effectiveStartTime should
+       give the correct duration we have been mining on this manager for. */
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_effectiveStartTime;
+
+    /* Time point when we paused. Used to alter the effectiveStartTime when we
+       resume again. */
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_pauseTime;
+
+    bool m_paused = false;
 };

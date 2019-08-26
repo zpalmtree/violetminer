@@ -32,7 +32,7 @@ void HashManager::submitHash(
 {
     if (m_totalHashes == 0)
     {
-        m_startTime = std::chrono::high_resolution_clock::now();
+        m_effectiveStartTime = std::chrono::high_resolution_clock::now();
     }
 
     m_totalHashes++;
@@ -61,7 +61,7 @@ void HashManager::shareAccepted()
 
 void HashManager::printStats()
 {
-    const auto elapsedTime = std::chrono::high_resolution_clock::now() - m_startTime;
+    const auto elapsedTime = std::chrono::high_resolution_clock::now() - m_effectiveStartTime;
 
     /* Calculating in milliseconds for more accuracy */
     const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTime).count();
@@ -92,4 +92,21 @@ void HashManager::printStats()
     std::cout << WhiteMsg("Accepted shares percentage: ")
               << std::fixed << std::setprecision(2)
               << WhiteMsg(submitPercentage) << WhiteMsg("%") << std::endl;
+}
+
+void HashManager::start()
+{
+    if (m_paused)
+    {
+        const auto pauseDuration = std::chrono::high_resolution_clock::now() - m_pauseTime;
+        m_effectiveStartTime += pauseDuration;
+    }
+
+    m_paused = false;
+}
+
+void HashManager::pause()
+{
+    m_paused = true;
+    m_pauseTime = std::chrono::high_resolution_clock::now();
 }
