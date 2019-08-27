@@ -28,18 +28,20 @@ class MinerManager
 
     void stop();
 
+    void printStats();
+
   private:
 
     /* PRIVATE METHODS */
     void hash(uint32_t threadNumber);
-
-    void printStats();
 
     void setNewJob(const Job &job);
 
     void pauseMining();
 
     void resumeMining();
+
+    void statPrinter();
 
     /* PRIVATE VARIABLES */
     std::vector<std::thread> m_threads;

@@ -110,7 +110,7 @@ void MinerManager::resumeMining()
     }
 
     /* Launch off the thread to print stats regularly */
-    m_statsThread = std::thread(&MinerManager::printStats, this);
+    m_statsThread = std::thread(&MinerManager::statPrinter, this);
 }
 
 void MinerManager::pauseMining()
@@ -249,11 +249,16 @@ void MinerManager::hash(uint32_t threadNumber)
 
 void MinerManager::printStats()
 {
+    m_hashManager.printStats();
+}
+
+void MinerManager::statPrinter()
+{
     m_hashManager.start();
 
     while (!m_shouldStop)
     {
         Utilities::sleepUnlessStopping(std::chrono::seconds(20), m_shouldStop);
-        m_hashManager.printStats();
+        printStats();
     }
 }

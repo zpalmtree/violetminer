@@ -4,14 +4,15 @@
 
 #include <iostream>
 
+#include "ArgonVariants/Variants.h"
 #include "Config/Config.h"
 #include "Config/Constants.h"
 #include "MinerManager/MinerManager.h"
+#include "Miner/GetConfig.h"
 #include "PoolCommunication/PoolCommunication.h"
 #include "Types/Pool.h"
 #include "Utilities/ColouredMsg.h"
-#include "ArgonVariants/Variants.h"
-#include "Miner/GetConfig.h"
+#include "Utilities/GetChar.h"
 
 #if defined(X86_OPTIMIZATIONS)
 #include "cpu_features/include/cpuinfo_x86.h"
@@ -98,7 +99,33 @@ void printWelcomeHeader(MinerConfig config)
         std::cout << WarningMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
     }
 
-    std::cout << std::endl;
+    std::cout << InformationMsg("* ") << WhiteMsg("COMMANDS", 25)
+              << InformationMsg("h") << SuccessMsg("ashrate")
+              << std::endl << std::endl;
+}
+
+void interact(MinerManager &userMinerManager, MinerManager &devMinerManager)
+{
+    std::string input;
+
+    while (true)
+    {
+        const char c = getCharNoBuffer();
+
+        switch(c)
+        {
+            case 'h':
+            {
+                userMinerManager.printStats();
+                break;
+            }
+            default:
+            {
+                std::cout << WhiteMsg("Available commands: ")
+                          << SuccessMsg("h") << WhiteMsg("ashrate") << std::endl;
+            }
+        }
+    }
 }
 
 int main(int argc, char **argv)
@@ -142,6 +169,8 @@ int main(int argc, char **argv)
         /* No dev fee, just start the users mining */
         userMinerManager.start();
 
+        std::thread interactionThread(interact, std::ref(userMinerManager), std::ref(devMinerManager));
+
         /* Wait forever */
         std::promise<void>().get_future().wait();
     }
@@ -153,6 +182,8 @@ int main(int argc, char **argv)
 
         /* Start mining for the user */
         userMinerManager.start();
+
+        std::thread interactionThread(interact, std::ref(userMinerManager), std::ref(devMinerManager));
 
         /* 100 minute rounds, alternating between users pool and devs pool */
         while (true)
