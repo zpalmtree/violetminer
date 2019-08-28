@@ -6,14 +6,13 @@ matrix:
 
   # Ubuntu, g++-8
   - os: linux
-    dist: trusty
+    dist: xenial
     compiler: gcc
     addons:
       apt:
         sources:
         - ubuntu-toolchain-r-test
         packages:
-          - libboost1.55-all-dev
           - libssl-dev
           - g++-8
           - gcc-8
@@ -22,7 +21,25 @@ matrix:
     - LABEL="linux-g++-8"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
-    - CUDA_SUPPORT="OFF"
+    - CUDA_SUPPORT="ON"
+    - CUDA_PATH="/usr/local/cuda"
+    - CUDA_BIN_PATH="/usr/local/cuda/bin"
+    - CUDA=10.1.243-1
+    - CUDA_SHORT=10.1.243-1
+    - UBUNTU_VERSION=ubuntu1604
+    before_install:
+    - eval $MATRIX_EVAL
+    - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
+    - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
+    - sudo dpkg -i ${INSTALLER}
+    - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
+    - sudo apt-key add 7fa2af80.pub
+    - sudo apt update -qq
+    - sudo apt install -y cuda
+    - sudo apt clean
+    - CUDA_HOME=/usr/local/cuda
+    - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+    - PATH=${CUDA_HOME}/bin:${PATH}
 
   # Ubuntu, clang-6
   - os: linux
@@ -34,7 +51,6 @@ matrix:
         - ubuntu-toolchain-r-test
         - llvm-toolchain-trusty-6.0
         packages:
-          - libboost1.55-all-dev
           - libssl-dev
           - clang-6.0
           - libstdc++-7-dev
