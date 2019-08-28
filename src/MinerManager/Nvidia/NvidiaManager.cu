@@ -2,16 +2,30 @@
 //
 // Please see the included LICENSE file for more information.
 
-//////////////////////////////////////////////
-#include "MinerManager/Nvidia/NvidiaManager.h"
-//////////////////////////////////////////////
-
 #include <iostream>
 #include <map>
 #include <vector>
 
 #include "Nvidia/Argon2.h"
 #include "Utilities/ColouredMsg.h"
+
+std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual()
+{
+    std::vector<std::tuple<std::string, bool, int>> devices;
+
+    int numberDevices;
+    cudaGetDeviceCount(&numberDevices);
+
+    for (int i = 0; i < numberDevices; i++)
+    {
+        cudaDeviceProp prop;
+        cudaGetDeviceProperties(&prop, i);
+
+        devices.push_back({prop.name, true, i});
+    }
+
+    return devices;
+}
 
 void printNvidiaHeader()
 {
@@ -69,4 +83,6 @@ void resumeNvidiaMining()
     {
         return;
     }
+
+    hash();
 }

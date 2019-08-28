@@ -10,17 +10,59 @@
 #include "Types/Pool.h"
 #include "Argon2/Constants.h"
 
+struct NvidiaDevice
+{
+    bool enabled = true;
+
+    std::string name;
+
+    uint16_t id;
+};
+
+struct AmdDevice
+{
+    bool enabled = true;
+
+    std::string name;
+
+    uint16_t id;
+};
+
+struct CpuConfig
+{
+    bool enabled = true;
+
+    uint32_t threadCount = std::thread::hardware_concurrency();
+
+    Constants::OptimizationMethod optimizationMethod;
+};
+
+struct NvidiaConfig
+{
+    std::vector<NvidiaDevice> devices;
+};
+
+struct AmdConfig
+{
+    std::vector<AmdDevice> devices;
+};
+
+struct HardwareConfig
+{
+    CpuConfig cpu;
+    NvidiaConfig nvidia;
+    AmdConfig amd;
+};
+
 struct MinerConfig
 {
     std::vector<Pool> pools;
 
-    uint32_t threadCount = std::thread::hardware_concurrency();
-
     std::string configLocation;
 
-    Constants::OptimizationMethod optimizationMethod;
-
     bool interactive = false;
+
+    HardwareConfig hardwareConfiguration;
 };
 
 void to_json(nlohmann::json &j, const MinerConfig &config);

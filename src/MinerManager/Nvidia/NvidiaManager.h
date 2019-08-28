@@ -4,6 +4,12 @@
 
 #pragma once
 
+#include <tuple>
+#include <string>
+#include <vector>
+
+std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual();
+
 void printNvidiaHeader();
 
 void resumeNvidiaMining();

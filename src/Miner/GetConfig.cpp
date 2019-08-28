@@ -20,18 +20,56 @@
 #include "cpu_features/include/cpuinfo_x86.h"
 #endif
 
-void to_json(nlohmann::json &j, const MinerConfig &config)
+#if defined(NVIDIA_ENABLED)
+#include "MinerManager/Nvidia/NvidiaManager.h"
+#else
+std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual() { return {}; }
+#endif
+
+#if defined(AMD_ENABLED)
+#include "MinerManager/Amd/AmdManager.h"
+#else
+std::vector<AmdDevice> getAmdDevices() { return {}; }
+#endif
+
+std::vector<NvidiaDevice> getNvidiaDevices()
+{
+    std::vector<NvidiaDevice> devices;
+
+    /* We could probably do some sort of struct/tuple initialization here.. */
+    for (const auto &[name, enabled, id] : getNvidiaDevicesActual())
+    {
+        NvidiaDevice device;
+
+        device.name = name;
+        device.enabled = enabled;
+        device.id = id;
+
+        devices.push_back(device);
+    }
+
+    return devices;
+}
+
+void to_json(nlohmann::json &j, const CpuConfig &config)
 {
     j = {
-        {"threadCount", config.threadCount},
-        {"pools", config.pools},
-        {"optimizationMethod", Constants::optimizationMethodToString(config.optimizationMethod)}
+        {"enabled", config.enabled},
+        {"optimizationMethod", Constants::optimizationMethodToString(config.optimizationMethod)},
+        {"threadCount", config.threadCount}
     };
 }
 
-void from_json(const nlohmann::json &j, MinerConfig &config)
+void from_json(const nlohmann::json &j, CpuConfig &config)
 {
-    config.pools = j.at("pools").get<std::vector<Pool>>();
+    if (j.find("enabled") != j.end())
+    {
+        config.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        config.enabled = true;
+    }
 
     if (j.find("threadCount") != j.end())
     {
@@ -54,6 +92,150 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     else
     {
         config.optimizationMethod = Constants::AUTO;
+    }
+}
+
+void to_json(nlohmann::json &j, const NvidiaDevice &device)
+{
+    j = {
+        {"enabled", device.enabled},
+        {"name", device.name},
+        {"id", device.id}
+    };
+}
+
+void from_json(const nlohmann::json &j, NvidiaDevice &device)
+{
+    if (j.find("enabled") != j.end())
+    {
+        device.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        device.enabled = true;
+    }
+
+    device.name = j.at("name").get<std::string>();
+    device.id = j.at("id").get<uint16_t>();
+}
+
+void to_json(nlohmann::json &j, const AmdDevice &device)
+{
+    j = {
+        {"enabled", device.enabled},
+        {"name", device.name},
+        {"id", device.id}
+    };
+}
+
+void from_json(const nlohmann::json &j, AmdDevice &device)
+{
+    if (j.find("enabled") != j.end())
+    {
+        device.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        device.enabled = true;
+    }
+
+    device.name = j.at("name").get<std::string>();
+    device.id = j.at("id").get<uint16_t>();
+}
+
+void to_json(nlohmann::json &j, const NvidiaConfig &config)
+{
+    j = {
+        {"devices", config.devices}
+    };
+}
+
+void from_json(const nlohmann::json &j, NvidiaConfig &config)
+{
+    if (j.find("devices") != j.end())
+    {
+        config.devices = j.at("devices").get<std::vector<NvidiaDevice>>();
+    }
+    else
+    {
+        config.devices = getNvidiaDevices();
+    }
+}
+
+void to_json(nlohmann::json &j, const AmdConfig &config)
+{
+    j = {
+        {"devices", config.devices}
+    };
+}
+
+void from_json(const nlohmann::json &j, AmdConfig &config)
+{
+    if (j.find("devices") != j.end())
+    {
+        config.devices = j.at("devices").get<std::vector<AmdDevice>>();
+    }
+    else
+    {
+        config.devices = getAmdDevices();
+    }
+}
+
+void to_json(nlohmann::json &j, const HardwareConfig &config)
+{
+    j = {
+        {"cpu", config.cpu},
+        {"nvidia", config.nvidia},
+        {"amd", config.amd}
+    };
+}
+
+void from_json(const nlohmann::json &j, HardwareConfig &config)
+{
+    if (j.find("cpu") != j.end())
+    {
+        config.cpu = j.at("cpu").get<CpuConfig>();
+    }
+    else
+    {
+        /* Default is fine for CPU right now */
+    }
+
+    if (j.find("nvidia") != j.end())
+    {
+        config.nvidia = j.at("nvidia").get<NvidiaConfig>();
+    }
+    else
+    {
+        config.nvidia.devices = getNvidiaDevices();
+    }
+
+    if (j.find("amd") != j.end())
+    {
+        config.amd = j.at("amd").get<AmdConfig>();
+    }
+    else
+    {
+        config.amd.devices = getAmdDevices();
+    }
+}
+
+
+void to_json(nlohmann::json &j, const MinerConfig &config)
+{
+    j = {
+        {"pools", config.pools},
+        {"hardwareConfiguration", config.hardwareConfiguration}
+    };
+}
+
+void from_json(const nlohmann::json &j, MinerConfig &config)
+{
+    config.pools = j.at("pools").get<std::vector<Pool>>();
+
+    if (j.find("hardwareConfiguration") != j.end())
+    {
+        config.hardwareConfiguration = j.at("hardwareConfiguration").get<HardwareConfig>();
     }
 }
 
@@ -276,7 +458,10 @@ MinerConfig getConfigInteractively()
     MinerConfig config;
 
     config.pools = getPools();
-    config.optimizationMethod = Constants::AUTO;
+    config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
+    config.hardwareConfiguration.amd.devices = getAmdDevices();
+    config.hardwareConfiguration.cpu.enabled = true;
+    config.hardwareConfiguration.cpu.optimizationMethod = Constants::AUTO;
     config.interactive = true;
 
     std::ofstream configFile(Constants::CONFIG_FILE_NAME);
@@ -393,7 +578,8 @@ MinerConfig getMinerConfig(int argc, char **argv)
          cxxopts::value<std::string>(poolConfig.algorithm), "<algorithm>")
 
         ("threads", "The number of mining threads to use",
-         cxxopts::value<uint32_t>(config.threadCount)->default_value(std::to_string(config.threadCount)), "<threads>");
+         cxxopts::value<uint32_t>(config.hardwareConfiguration.cpu.threadCount)->default_value(
+            std::to_string(config.hardwareConfiguration.cpu.threadCount)), "<threads>");
 
     try
     {
@@ -475,7 +661,10 @@ MinerConfig getMinerConfig(int argc, char **argv)
             poolConfig.algorithmGenerator = it->second;
 
             config.pools.push_back(poolConfig);
-            config.optimizationMethod = Constants::AUTO;
+            config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
+            config.hardwareConfiguration.amd.devices = getAmdDevices();
+            config.hardwareConfiguration.cpu.enabled = true;
+            config.hardwareConfiguration.cpu.optimizationMethod = Constants::AUTO;
 
             return config;
         }
