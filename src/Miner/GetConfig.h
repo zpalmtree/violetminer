@@ -34,7 +34,7 @@ struct CpuConfig
 
     uint32_t threadCount = std::thread::hardware_concurrency();
 
-    Constants::OptimizationMethod optimizationMethod;
+    Constants::OptimizationMethod optimizationMethod = Constants::OptimizationMethod::AUTO;
 };
 
 struct NvidiaConfig
