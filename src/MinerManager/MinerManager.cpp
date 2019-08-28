@@ -13,6 +13,10 @@
 #include "Utilities/ColouredMsg.h"
 #include "Utilities/Utilities.h"
 
+#if defined(NVIDIA_ENABLED)
+#include "MinerManager/Nvidia/NvidiaManager.h"
+#endif
+
 MinerManager::MinerManager(
     const std::shared_ptr<PoolCommunication> pool,
     const uint32_t threadCount):
@@ -108,6 +112,10 @@ void MinerManager::resumeMining()
     {
         m_threads.push_back(std::thread(&MinerManager::hash, this, i));
     }
+
+    #if defined(NVIDIA_ENABLED)
+    resumeNvidiaMining();
+    #endif
 
     /* Launch off the thread to print stats regularly */
     m_statsThread = std::thread(&MinerManager::statPrinter, this);

@@ -1,6 +1,6 @@
 @echo off
 
-cmake -G "Visual Studio 15 2017 Win64" .. || exit /b 1
+cmake -DENABLE_NVIDIA=OFF -G "Visual Studio 15 2017 Win64" .. || exit /b 1
 
 MSBuild violetminer.sln /p:Configuration=Release /m || exit /b 1 
 

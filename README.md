@@ -156,6 +156,10 @@ For example, I get 7300h/s with GCC, and 10500h/s with Clang on a Ryzen 1600.
 
 If you're on ARM however, GCC gets slightly better hashrate.
 
+#### Disabling NVIDIA support
+
+Run cmake like so: `cmake -DNVIDIA=OFF ..`
+
 #### Ubuntu, using Clang
 
 - `sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y`

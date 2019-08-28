@@ -18,6 +18,10 @@
 #include "cpu_features/include/cpuinfo_x86.h"
 #endif
 
+#if defined(NVIDIA_ENABLED)
+#include "MinerManager/Nvidia/NvidiaManager.h"
+#endif
+
 std::vector<Pool> getDevPools()
 {
     std::vector<Pool> pools;
@@ -98,6 +102,10 @@ void printWelcomeHeader(MinerConfig config)
     {
         std::cout << WarningMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
     }
+
+#if defined(NVIDIA_ENABLED)
+    printNvidiaHeader();
+#endif
 
     std::cout << InformationMsg("* ") << WhiteMsg("COMMANDS", 25)
               << InformationMsg("h") << SuccessMsg("ashrate")

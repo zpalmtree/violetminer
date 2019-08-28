@@ -1,7 +1,16 @@
 # We need 3.8 for set(CMAKE_CXX_STANDARD 17)
 cmake_minimum_required(VERSION 3.8)
 
-project(violetminer)
+project(violetminer LANGUAGES CXX)
+
+option(ENABLE_NVIDIA "Enable Nvidia support" ON)
+
+if (ENABLE_NVIDIA)
+    enable_language(CUDA)
+    add_definitions(-DNVIDIA_ENABLED)
+else()
+    message(STATUS "NVIDIA support disabled!")
+endif()
 
 # Assert our compiler is good
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

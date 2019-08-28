@@ -22,6 +22,7 @@ matrix:
     - LABEL="linux-g++-8"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
+    - CUDA_SUPPORT="OFF"
 
   # Ubuntu, clang-6
   - os: linux
@@ -43,6 +44,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
+    - CUDA_SUPPORT="OFF"
 
   # OSX, clang
   - os: osx
@@ -53,6 +55,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-osx"
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
+    - CUDA_SUPPORT="OFF"
     install:
     # Need to make sure that we have openssl installed
     - travis_retry brew install openssl || travis_retry brew upgrade openssl
@@ -67,6 +70,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-armv8"
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
+    - CUDA_SUPPORT="OFF"
 
   # Windows, MSVC
   - os: windows
@@ -94,7 +98,7 @@ script:
 # we do this in the script stage because this happens after the repo is cloned
 - if [[ "$LABEL" == "aarch64" ]]; then source scripts/prep-aarch64.sh ; fi
 - mkdir build && cd build
-- cmake -DCMAKE_BUILD_TYPE=Release ..
+- cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NVIDIA=$CUDA_SUPPORT ..
 - make -j2
 - if [[ "$LABEL" != "aarch64" ]]; then ./argon2-cpp-test ; fi
 - mkdir $RELEASE_FILENAME
