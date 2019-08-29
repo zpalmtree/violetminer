@@ -9,6 +9,7 @@
 #include <thread>
 
 #include "MinerManager/HashManager.h"
+#include "Miner/GetConfig.h"
 #include "PoolCommunication/PoolCommunication.h"
 #include "Types/IHashingAlgorithm.h"
 
@@ -18,7 +19,7 @@ class MinerManager
     /* CONSTRUCTOR */
     MinerManager(
         const std::shared_ptr<PoolCommunication> pool,
-        const uint32_t threadCount);
+        const HardwareConfig hardwareConfig);
 
     /* DESTRUCTOR */
     ~MinerManager();
@@ -49,8 +50,8 @@ class MinerManager
     /* Should we stop the worker funcs */
     std::atomic<bool> m_shouldStop = false;
 
-    /* Number of threads to launch */
-    const uint32_t m_threadCount;
+    /* Threads to launch, whether CPU/GPU is enabled, etc */
+    const HardwareConfig m_hardwareConfig;
 
     /* Pool connection */
     const std::shared_ptr<PoolCommunication> m_pool;

@@ -19,9 +19,9 @@
 
 MinerManager::MinerManager(
     const std::shared_ptr<PoolCommunication> pool,
-    const uint32_t threadCount):
+    const HardwareConfig hardwareConfig):
     m_pool(pool),
-    m_threadCount(threadCount),
+    m_hardwareConfig(hardwareConfig),
     m_hashManager(pool),
     m_gen(m_device())
 {
@@ -104,17 +104,41 @@ void MinerManager::resumeMining()
     /* Set initial nonce */
     m_nonce = m_distribution(m_gen);
 
-    /* Indicate that there's no new jobs available to other threads */
-    m_newJobAvailable = std::vector<bool>(m_threadCount, false);
- 
-    /* Launch off the miner threads */
-    for (uint32_t i = 0; i < m_threadCount; i++)
+    if (m_hardwareConfig.cpu.enabled)
     {
-        m_threads.push_back(std::thread(&MinerManager::hash, this, i));
+        /* Indicate that there's no new jobs available to other threads */
+        m_newJobAvailable = std::vector<bool>(m_hardwareConfig.cpu.threadCount, false);
+
+        /* Launch off the miner threads */
+        for (uint32_t i = 0; i < m_hardwareConfig.cpu.threadCount; i++)
+        {
+            m_threads.push_back(std::thread(&MinerManager::hash, this, i));
+        }
+    }
+    else
+    {
+        std::cout << WarningMsg("CPU mining disabled, not starting") << std::endl;
     }
 
     #if defined(NVIDIA_ENABLED)
-    resumeNvidiaMining();
+    const bool allNvidiaGPUsDisabled = std::none_of(
+        m_hardwareConfig.nvidia.devices.begin(),
+        m_hardwareConfig.nvidia.devices.end(),
+        [](const auto device)
+        {
+            return device.enabled;
+        }
+    );
+
+    /* If we have at least one device, start nvidia mining */
+    if (!allNvidiaGPUsDisabled)
+    {
+        resumeNvidiaMining();
+    }
+    else
+    {
+        std::cout << WarningMsg("No Nvidia GPUs available, or all disabled, not starting Nvidia mining") << std::endl;
+    }
     #endif
 
     /* Launch off the thread to print stats regularly */
@@ -130,9 +154,12 @@ void MinerManager::pauseMining()
     /* Pause the hashrate calculator */
     m_hashManager.pause();
 
-    for (uint32_t i = 0; i < m_threadCount; i++)
+    if (m_hardwareConfig.cpu.enabled)
     {
-        m_newJobAvailable[i] = true;
+        for (uint32_t i = 0; i < m_hardwareConfig.cpu.threadCount; i++)
+        {
+            m_newJobAvailable[i] = true;
+        }
     }
 
     /* Wait for all the threads to stop */
@@ -238,7 +265,7 @@ void MinerManager::hash(uint32_t threadNumber)
 
             m_hashManager.submitHash(hash, job.jobID, *job.nonce(), job.target);
 
-            localNonce += m_threadCount;
+            localNonce += m_hardwareConfig.cpu.threadCount;
 
             if (isNiceHash)
             {
