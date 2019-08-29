@@ -186,7 +186,7 @@ void to_json(nlohmann::json &j, const HardwareConfig &config)
     j = {
         {"cpu", config.cpu},
         {"nvidia", config.nvidia},
-        {"amd", config.amd}
+        /*{"amd", config.amd}*/
     };
 }
 
@@ -236,6 +236,11 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     if (j.find("hardwareConfiguration") != j.end())
     {
         config.hardwareConfiguration = j.at("hardwareConfiguration").get<HardwareConfig>();
+    }
+    else
+    {
+        config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
+        config.hardwareConfiguration.amd.devices = getAmdDevices();
     }
 }
 
@@ -462,7 +467,6 @@ void writeConfigToDisk(MinerConfig config)
     if (configFile)
     {
         configFile << j.dump(4) << std::endl;
-        std::cout << SuccessMsg("Wrote config file to " + Constants::CONFIG_FILE_NAME) << std::endl;
     }
     else
     {

@@ -21,7 +21,7 @@ std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual()
         cudaDeviceProp prop;
         cudaGetDeviceProperties(&prop, i);
 
-        devices.push_back({prop.name, true, i});
+        devices.push_back(std::make_tuple(prop.name, true, i));
     }
 
     return devices;
