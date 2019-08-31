@@ -46,6 +46,13 @@ void HashManager::submitHash(
 
 void HashManager::shareAccepted()
 {
+    /* Sometimes the pool randomly sends us a share accepted message... even
+       when we haven't submitted any shares. Why? Who knows! */
+    if (m_totalHashes == 0 || m_submittedHashes == 0)
+    {
+        return;
+    }
+
     m_acceptedHashes++;
 
     m_pool->printPool();
@@ -54,7 +61,16 @@ void HashManager::shareAccepted()
 
     std::stringstream stream;
 
-    stream << " [" << m_acceptedHashes << " / " << m_submittedHashes << "]" << std::endl;
+    uint64_t accepted = m_acceptedHashes;
+    const uint64_t sent = m_submittedHashes;
+
+    /* Pools sometimes send double accepted messages */
+    if (accepted > sent)
+    {
+        accepted = sent;
+    }
+
+    stream << " [" << accepted << " / " << sent << "]" << std::endl;
 
     std::cout << InformationMsg(stream.str());
 }
@@ -85,6 +101,11 @@ void HashManager::printStats()
     if (m_acceptedHashes != 0 && m_submittedHashes != 0)
     {
         submitPercentage = 100 * (static_cast<double>(m_acceptedHashes) / m_submittedHashes);
+
+        if (submitPercentage > 100)
+        {
+            submitPercentage = 100;
+        }
     }
 
     m_pool->printPool();
