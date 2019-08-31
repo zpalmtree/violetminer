@@ -48,18 +48,33 @@ For example:
 
 ```json
 {
-    "optimizationMethod": "Auto",
+    "hardwareConfiguration": {
+        "cpu": {
+            "enabled": true,
+            "optimizationMethod": "Auto",
+            "threadCount": 12
+        },
+        "nvidia": {
+            "devices": [
+                {
+                    "enabled": true,
+                    "id": 0,
+                    "name": "GeForce GTX 1070"
+                }
+            ]
+        }
+    },
     "pools": [
         {
             "agent": "",
             "algorithm": "turtlecoin",
-            "host": "pool.turtlecoin.dev",
+            "host": "trtl.pool.mine2gether.com",
             "niceHash": false,
-            "password": "",
-            "port": 5555,
+            "password": "x",
+            "port": 3335,
+            "priority": 0,
             "rigID": "",
-            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW",
-            "priority": 0
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
             "agent": "violetminer-v0.0.3",
@@ -72,11 +87,19 @@ For example:
             "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7",
             "priority": 1
         }
-
-    ],
-    "threadCount": 12
+    ]
 }
 ```
+
+### Disabling CPU/GPU/Specific Cards
+
+* If you want to disable CPU mining, either set `enabled` to `false` in the cpu section, or start the miner with the `--disableCPU` flag.
+* If you want to disable Nvidia mining, either set `enabled` to `false` for each card in the nvidia devices section, or start the miner with the `--disableNVIDIA` flag.
+
+* If you want to disable a specific Nvidia or AMD card, just set `enabled` to `false` in the nvidia devices section for the appropriate card.
+
+Note that changing the `name` field does not do anything. It is only there to help you identify which device has which id.
+It's highly recommended that you don't change the `name` or `id` fields, or you may end up with quite a confusing result.
 
 ### Optimization method
 
