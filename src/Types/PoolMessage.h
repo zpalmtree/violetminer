@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <iostream>
 #include <optional>
 #include <string>
 #include <variant>
@@ -46,6 +45,13 @@ struct Job
     std::optional<uint8_t> rootMajorVersion;
 
     std::optional<uint8_t> rootMinorVersion;
+
+    /* Is this job a nicehash job - Set by the pool config */
+    bool isNiceHash = false;
+
+    /* What is the algorithm required for this pool - Set by the pool config,
+       or by the pool if supported */
+    std::string algorithm;
 
     inline uint32_t *nonce()
     {

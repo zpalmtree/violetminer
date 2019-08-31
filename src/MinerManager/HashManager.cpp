@@ -24,11 +24,7 @@ bool isHashValidForTarget(
     return *reinterpret_cast<const uint64_t *>(hash.data() + 24) < target;
 }
 
-void HashManager::submitHash(
-    const std::vector<uint8_t> &hash,
-    const std::string jobID,
-    const uint32_t nonce,
-    const uint64_t target)
+void HashManager::submitHash(const JobSubmit &jobSubmit)
 {
     if (m_totalHashes == 0)
     {
@@ -37,10 +33,10 @@ void HashManager::submitHash(
 
     m_totalHashes++;
 
-    if (isHashValidForTarget(hash, target))
+    if (isHashValidForTarget(jobSubmit.hash, jobSubmit.target))
     {
         m_submittedHashes++;
-        m_pool->submitShare(hash, jobID, nonce);
+        m_pool->submitShare(jobSubmit.hash, jobSubmit.jobID, jobSubmit.nonce);
     }
 }
 

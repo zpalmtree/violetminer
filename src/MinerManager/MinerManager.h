@@ -8,6 +8,7 @@
 #include <random>
 #include <thread>
 
+#include "Backend/IBackend.h"
 #include "MinerManager/HashManager.h"
 #include "Miner/GetConfig.h"
 #include "PoolCommunication/PoolCommunication.h"
@@ -34,8 +35,6 @@ class MinerManager
   private:
 
     /* PRIVATE METHODS */
-    void hash(uint32_t threadNumber);
-
     void setNewJob(const Job &job);
 
     void pauseMining();
@@ -61,12 +60,6 @@ class MinerManager
     /* Handles submitting shares and tracking hashrate statistics */
     HashManager m_hashManager;
 
-    /* Current job to be working on */
-    Job m_currentJob;
-
-    /* Nonce to begin hashing at */
-    uint32_t m_nonce;
-
     /* Handles creating random nonces */
     std::random_device m_device;
 
@@ -74,9 +67,9 @@ class MinerManager
 
     std::uniform_int_distribution<uint32_t> m_distribution {0, std::numeric_limits<uint32_t>::max()};
 
-    /* A bool for each thread indicating if they should swap to a new job */
-    std::vector<bool> m_newJobAvailable;
-
     /* Thread that periodically prints hashrate, etc */
     std::thread m_statsThread;
+
+    /* CPU, GPU, etc hash backends that we are currently using */
+    std::vector<std::shared_ptr<IBackend>> m_enabledBackends;
 };

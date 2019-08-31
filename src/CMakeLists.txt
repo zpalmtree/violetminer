@@ -7,6 +7,9 @@ add_subdirectory(ArgonVariants)
 # Add the Argon2 directory to add that library
 add_subdirectory(Argon2)
 
+# Add the Backend directory to add that library
+add_subdirectory(Backend)
+
 # Add the Config directory to add that library
 add_subdirectory(Config)
 

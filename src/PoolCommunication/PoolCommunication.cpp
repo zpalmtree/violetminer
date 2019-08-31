@@ -121,10 +121,12 @@ void PoolCommunication::registerHandlers()
                 return;
             }
 
-            const auto poolMessage = parsePoolMessage(message);
+            auto poolMessage = parsePoolMessage(message);
 
             if (auto job = std::get_if<JobMessage>(&poolMessage))
             {
+                updateJobInfoFromPool(job->job);
+
                 m_currentJob = job->job;
 
                 if (m_onNewJob)
@@ -330,6 +332,7 @@ bool PoolCommunication::tryLogin(const Pool &pool)
                 m_socket = socket;
                 m_currentPool = pool;
                 m_currentPool.loginID = message.loginID;
+                updateJobInfoFromPool(message.job);
                 m_currentJob = message.job;
 
                 if (*message.job.nonce() != 0)
@@ -437,12 +440,13 @@ void PoolCommunication::keepAlive()
     m_socket->sendMessage(pingMsg.dump() + "\n");
 }
 
-std::shared_ptr<IHashingAlgorithm> PoolCommunication::getMiningAlgorithm() const
+void PoolCommunication::updateJobInfoFromPool(Job &job) const
 {
-    return m_currentPool.algorithmGenerator();
+    job.isNiceHash = isNiceHash();
+    job.algorithm = getMiningAlgorithm();
 }
 
-std::string PoolCommunication::getAlgorithmName() const
+std::string PoolCommunication::getMiningAlgorithm() const
 {
     return m_currentPool.algorithm;
 }

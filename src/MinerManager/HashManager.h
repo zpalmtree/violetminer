@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "Types/JobSubmit.h"
 #include "PoolCommunication/PoolCommunication.h"
 
 class HashManager
@@ -16,11 +17,7 @@ class HashManager
     HashManager(const std::shared_ptr<PoolCommunication> pool);
 
     /* Call this to submit a hash to the pool. We will check the diff. */
-    void submitHash(
-        const std::vector<uint8_t> &hash,
-        const std::string jobID,
-        const uint32_t nonce,
-        const uint64_t target);
+    void submitHash(const JobSubmit &jobSubmit);
 
     /* Call this when a share got accepted by the pool. */
     void shareAccepted();

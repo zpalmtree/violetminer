@@ -40,4 +40,9 @@ namespace ArgonVariant
         { "chukwa_wrkz", chukwa_wrkz },
         { "wrkzcoin", chukwa_wrkz },
     };
+
+    inline std::shared_ptr<IHashingAlgorithm> getCPUMiningAlgorithm(std::string algorithm)
+    {
+        return ArgonVariant::Algorithms.at(algorithm)();
+    }
 }
