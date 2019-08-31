@@ -63,7 +63,7 @@ void HashManager::shareAccepted()
     /* Pools sometimes send double accepted messages */
     if (accepted > sent)
     {
-        accepted = sent;
+        return;
     }
 
     stream << " [" << accepted << " / " << sent << "]" << std::endl;
