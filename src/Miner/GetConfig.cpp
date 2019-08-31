@@ -548,6 +548,9 @@ MinerConfig getMinerConfig(int argc, char **argv)
 
     bool help;
     bool version;
+    bool disableCPU;
+    bool disableNVIDIA;
+    bool disableAMD;
 
     cxxopts::Options options(argv[0], "");
 
@@ -580,7 +583,16 @@ MinerConfig getMinerConfig(int argc, char **argv)
 
         ("threads", "The number of mining threads to use",
          cxxopts::value<uint32_t>(config.hardwareConfiguration.cpu.threadCount)->default_value(
-            std::to_string(config.hardwareConfiguration.cpu.threadCount)), "<threads>");
+            std::to_string(config.hardwareConfiguration.cpu.threadCount)), "<threads>")
+
+        ("disableCPU", "Disable CPU mining",
+         cxxopts::value<bool>(disableCPU)->implicit_value("true"))
+
+        ("disableNVIDIA", "Disable Nvidia mining",
+         cxxopts::value<bool>(disableNVIDIA)->implicit_value("true"))
+
+        ("disableAMD", "Disable AMD mining",
+         cxxopts::value<bool>(disableAMD)->implicit_value("true"));
 
     try
     {
@@ -670,6 +682,27 @@ MinerConfig getMinerConfig(int argc, char **argv)
             config.hardwareConfiguration.amd.devices = getAmdDevices();
             config.hardwareConfiguration.cpu.enabled = true;
             config.hardwareConfiguration.cpu.optimizationMethod = Constants::AUTO;
+
+            if (disableCPU)
+            {
+                config.hardwareConfiguration.cpu.enabled = false;
+            }
+
+            if (disableNVIDIA)
+            {
+                for (auto &device : config.hardwareConfiguration.nvidia.devices)
+                {
+                    device.enabled = false;
+                }
+            }
+
+            if (disableAMD)
+            {
+                for (auto &device : config.hardwareConfiguration.amd.devices)
+                {
+                    device.enabled = false;
+                }
+            }
 
             return config;
         }
