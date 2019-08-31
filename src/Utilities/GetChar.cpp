@@ -6,17 +6,23 @@
 #include "GetChar.h"
 ////////////////////
 
+#include <iostream>
+
 #if _WIN32
 
+    #include "Console.h"
+
     #include <conio.h>
+
+    #define ETX 3
 
     char getCharNoBuffer()
     {
         char c = _getch();
 
-        if (c == EOF)
+        if (static_cast<int>(c) == ETX)
         {
-            exitOrWaitForInput(0);
+            Console::exitOrWaitForInput(0);
         }
 
         return c;
@@ -24,8 +30,7 @@
 
 #else
 
-    #include <iostream>
-	#include <termios.h>
+    #include <termios.h>
 
     static termios oldTerm;
     static termios newTerm;
@@ -45,7 +50,7 @@
 
         tcsetattr(0, TCSANOW, &oldTerm);
 
-		return c;
+        return c;
     }
 
 #endif
