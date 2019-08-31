@@ -137,17 +137,17 @@ void MinerManager::startNvidiaMining()
 
     auto lastErrorAt = std::chrono::high_resolution_clock::now();
 
+    const bool allNvidiaGPUsDisabled = std::none_of(
+        m_hardwareConfig.nvidia.devices.begin(),
+        m_hardwareConfig.nvidia.devices.end(),
+        [](const auto device)
+        {
+            return device.enabled;
+        }
+    );
+
     while (true)
     {
-        const bool allNvidiaGPUsDisabled = std::none_of(
-            m_hardwareConfig.nvidia.devices.begin(),
-            m_hardwareConfig.nvidia.devices.end(),
-            [](const auto device)
-            {
-                return device.enabled;
-            }
-        );
-
         /* If we have at least one device, start nvidia mining */
         if (!allNvidiaGPUsDisabled)
         {
@@ -183,6 +183,10 @@ void MinerManager::startNvidiaMining()
 
                 std::cout << WarningMsg("Error performining mining on Nvidia GPU: " + std::string(e.what())) << std::endl;
                 std::cout << InformationMsg("Restarting Nvidia mining...\n") << std::endl;
+
+                /* TODO: Remove */
+                return;
+
                 continue;
             }
         }
@@ -191,6 +195,9 @@ void MinerManager::startNvidiaMining()
             std::cout << WarningMsg("No Nvidia GPUs available, or all disabled, not starting Nvidia mining") << std::endl;
             return;
         }
+
+        /* TODO: Remove */
+        return;
     }
     #endif
 }
