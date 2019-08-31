@@ -12,7 +12,14 @@
 
     char getCharNoBuffer()
     {
-        return _getch();
+        char c = _getch();
+
+        if (c == EOF)
+        {
+            exitOrWaitForInput(0);
+        }
+
+        return c;
     }
 
 #else
