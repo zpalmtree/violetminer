@@ -32,7 +32,6 @@ std::vector<Pool> getDevPools()
     pool1.username = "donate";
     pool1.algorithm = "turtlecoin";
     pool1.niceHash = true;
-    pool1.algorithmGenerator = ArgonVariant::Algorithms[pool1.algorithm];
 
     pools.push_back(pool1);
 

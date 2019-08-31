@@ -92,7 +92,7 @@ void CPU::hash(const uint32_t threadNumber)
 
         const bool isNiceHash = job.isNiceHash;
 
-        std::shared_ptr<IHashingAlgorithm> algorithm = ArgonVariant::getCPUMiningAlgorithm(m_currentJob.algorithm);
+        auto algorithm = ArgonVariant::getCPUMiningAlgorithm(m_currentJob.algorithm);
 
         /* Let the algorithm perform any necessary initialization */
         algorithm->init(m_currentJob.rawBlob);

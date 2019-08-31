@@ -378,9 +378,13 @@ Pool getPool()
     {
         std::cout << InformationMsg("\nAvailable mining algorithms:") << std::endl;
 
-        for (const auto [algorithm, hashingFunc] : ArgonVariant::Algorithms)
+        for (const auto [algorithmName, algoEnum, shouldDisplay] : ArgonVariant::algorithmNameMapping)
         {
-            std::cout << SuccessMsg("* ") << SuccessMsg(algorithm) << std::endl;
+            /* We don't print every single alias because it would get a little silly. */
+            if (shouldDisplay)
+            {
+                std::cout << SuccessMsg("* ") << SuccessMsg(algorithmName) << std::endl;
+            }
         }
 
         std::cout << InformationMsg("\nEnter the algorithm you wish to mine with on this pool: ");
@@ -389,32 +393,18 @@ Pool getPool()
 
         std::getline(std::cin, algorithm);
 
-        Utilities::trim(algorithm);
-
-        std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), ::tolower);
-
         if (algorithm == "")
         {
             continue;
         }
 
-        const auto it = std::find_if(
-            ArgonVariant::Algorithms.begin(), 
-            ArgonVariant::Algorithms.end(),
-            [&algorithm](const auto algo)
+        try
         {
-            std::string theirAlgo = algo.first;
-            std::transform(theirAlgo.begin(), theirAlgo.end(), theirAlgo.begin(), ::tolower);
-            return theirAlgo == algorithm;
-        });
-
-        if (it != ArgonVariant::Algorithms.end())
-        {
-            pool.algorithm = it->first;
-            pool.algorithmGenerator = it->second;
+            ArgonVariant::algorithmNameToCanonical(algorithm);
+            pool.algorithm = algorithm;
             break;
         }
-        else
+        catch (const std::exception &)
         {
             std::cout << WarningMsg("Unknown algorithm \"" + algorithm + "\". Try again.") << std::endl;
         }
@@ -653,23 +643,27 @@ MinerConfig getMinerConfig(int argc, char **argv)
                 Console::exitOrWaitForInput(1);
             }
 
-            const auto it = ArgonVariant::Algorithms.find(poolConfig.algorithm);
-
-            if (it == ArgonVariant::Algorithms.end())
+            try
+            {
+                ArgonVariant::algorithmNameToCanonical(poolConfig.algorithm);
+            }
+            catch (const std::exception &)
             {
                 std::cout << WarningMsg("Algorithm \"" + poolConfig.algorithm + "\" is not a known algorithm!") << std::endl;
 
                 std::cout << InformationMsg("Available mining algorithms:") << std::endl;
 
-                for (const auto [algorithm, hashingFunc] : ArgonVariant::Algorithms)
+                for (const auto [algorithmName, algoEnum, shouldDisplay] : ArgonVariant::algorithmNameMapping)
                 {
-                    std::cout << SuccessMsg("* ") << SuccessMsg(algorithm) << std::endl;
+                    /* We don't print every single alias because it would get a little silly. */
+                    if (shouldDisplay)
+                    {
+                        std::cout << SuccessMsg("* ") << SuccessMsg(algorithmName) << std::endl;
+                    }
                 }
 
                 Console::exitOrWaitForInput(1);
             }
-
-            poolConfig.algorithmGenerator = it->second;
 
             config.pools.push_back(poolConfig);
             config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();

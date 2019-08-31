@@ -4,3 +4,5 @@ set(cpu_backend_source_files
 )
 
 add_library(CPUBackend ${cpu_backend_source_files})
+
+target_link_libraries(CPUBackend ArgonVariants Argon2)
