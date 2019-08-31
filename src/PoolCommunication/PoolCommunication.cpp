@@ -296,10 +296,30 @@ bool PoolCommunication::tryLogin(const Pool &pool)
 
         if (res)
         {
+            LoginMessage message;
+
             try
             {
-                const LoginMessage message = nlohmann::json::parse(*res);
+                message = nlohmann::json::parse(*res);
+            }
+            catch (const std::exception &e)
+            {
+                try
+                {
+                    /* Failed to parse as LoginMessage. Maybe it's an error message? */
+                    const ErrorMessage errMessage = nlohmann::json::parse(*res);
+                    loginFailed(pool, i, false, errMessage.error.errorMessage);
+                }
+                catch (const std::exception &)
+                {
+                    loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
+                }
 
+                continue;
+            }
+
+            try
+            {
                 std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Logged in.") << std::endl;
                 
                 if (m_socket)
@@ -325,21 +345,10 @@ bool PoolCommunication::tryLogin(const Pool &pool)
                 }
 
                 return true;
-
             }
-            catch (const std::exception &)
+            catch (const std::exception &e)
             {
-                try
-                {
-                    /* Failed to parse as LoginMessage. Maybe it's an error message? */
-                    const ErrorMessage message = nlohmann::json::parse(*res);
-                    loginFailed(pool, i, false, message.error.errorMessage);
-                }
-                catch (const std::exception &e)
-                {
-                    loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
-                }
-
+                loginFailed(pool, i, false, std::string(e.what()));
                 continue;
             }
         }

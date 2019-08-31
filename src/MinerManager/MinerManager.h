@@ -42,6 +42,8 @@ class MinerManager
 
     void resumeMining();
 
+    void startNvidiaMining();
+
     void statPrinter();
 
     /* PRIVATE VARIABLES */
