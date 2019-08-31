@@ -20,7 +20,8 @@ class MinerManager
     /* CONSTRUCTOR */
     MinerManager(
         const std::shared_ptr<PoolCommunication> pool,
-        const HardwareConfig hardwareConfig);
+        const HardwareConfig hardwareConfig,
+        const bool areDevPool);
 
     /* DESTRUCTOR */
     ~MinerManager();

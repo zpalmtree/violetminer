@@ -157,8 +157,8 @@ int main(int argc, char **argv)
     const auto devPoolManager = std::make_shared<PoolCommunication>(devPools);
 
     /* Setup a manager for the user pools and the dev pools */
-    MinerManager userMinerManager(userPoolManager, config.hardwareConfiguration);
-    MinerManager devMinerManager(devPoolManager, config.hardwareConfiguration);
+    MinerManager userMinerManager(userPoolManager, config.hardwareConfiguration, false);
+    MinerManager devMinerManager(devPoolManager, config.hardwareConfiguration, true);
 
     /* A cycle lasts 100 minutes */
     const auto cycleLength = std::chrono::minutes(100);

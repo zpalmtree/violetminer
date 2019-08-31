@@ -17,12 +17,12 @@
 
 #if defined(NVIDIA_ENABLED)
 #include "Backend/Nvidia/Nvidia.h"
-#include "MinerManager/Nvidia/NvidiaManager.h"
 #endif
 
 MinerManager::MinerManager(
     const std::shared_ptr<PoolCommunication> pool,
-    const HardwareConfig hardwareConfig):
+    const HardwareConfig hardwareConfig,
+    const bool areDevPool):
     m_pool(pool),
     m_hardwareConfig(hardwareConfig),
     m_hashManager(pool),
@@ -37,12 +37,30 @@ MinerManager::MinerManager(
     {
         m_enabledBackends.push_back(std::make_shared<CPU>(hardwareConfig, submit));
     }
-    /* TODO: This will print for the dev manager as well. Probably want a bool
-       to indicate which manager we're in. */
-    else
+    else if (!areDevPool)
     {
         std::cout << WarningMsg("CPU mining disabled.") << std::endl;
     }
+
+    const bool allNvidiaGPUsDisabled = std::none_of(
+        m_hardwareConfig.nvidia.devices.begin(),
+        m_hardwareConfig.nvidia.devices.end(),
+        [](const auto device)
+        {
+            return device.enabled;
+        }
+    );
+
+    #if defined(NVIDIA_ENABLED)
+    if (!allNvidiaGPUsDisabled)
+    {
+        m_enabledBackends.push_back(std::make_shared<Nvidia>(hardwareConfig, submit));
+    }
+    else if (!areDevPool)
+    {
+        std::cout << WarningMsg("No Nvidia GPUs available, or all disabled, not starting Nvidia mining") << std::endl;
+    }
+    #endif
 }
 
 MinerManager::~MinerManager()
@@ -123,9 +141,6 @@ void MinerManager::resumeMining()
         backend->start(job, nonce);
     }
 
-    /* Start nvidia mining if nvidia mining enabled */
-    startNvidiaMining();
-
     /* Launch off the thread to print stats regularly */
     m_statsThread = std::thread(&MinerManager::statPrinter, this);
 }
@@ -156,7 +171,7 @@ void MinerManager::startNvidiaMining()
         {
             try
             {
-                resumeNvidiaMining();
+                //resumeNvidiaMining();
             }
             catch (const std::exception &e)
             {
