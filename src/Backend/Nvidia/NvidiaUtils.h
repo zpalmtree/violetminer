@@ -11,5 +11,3 @@
 std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual();
 
 void printNvidiaHeader();
-
-void resumeNvidiaMining();

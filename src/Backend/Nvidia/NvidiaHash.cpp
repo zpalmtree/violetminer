@@ -6,6 +6,7 @@
 #include "Backend/Nvidia/NvidiaHash.h"
 //////////////////////////////////////
 
+#include "Nvidia/Argon2.h"
 #include "Config/Config.h"
 
 void NvidiaHash::init(std::vector<uint8_t> &initialInput)
@@ -21,7 +22,7 @@ void NvidiaHash::reinit(const std::vector<uint8_t> &input)
 
 std::vector<uint8_t> NvidiaHash::hash(std::vector<uint8_t> &input)
 {
-    return m_argonInstance.Hash(input, m_salt);
+    return nvidiaHash(input, m_salt);
 }
 
 NvidiaHash::NvidiaHash(

@@ -42,8 +42,6 @@ class MinerManager
 
     void resumeMining();
 
-    void startNvidiaMining();
-
     void statPrinter();
 
     /* PRIVATE VARIABLES */
@@ -51,9 +49,6 @@ class MinerManager
 
     /* Should we stop the worker funcs */
     std::atomic<bool> m_shouldStop = false;
-
-    /* Threads to launch, whether CPU/GPU is enabled, etc */
-    const HardwareConfig m_hardwareConfig;
 
     /* Pool connection */
     const std::shared_ptr<PoolCommunication> m_pool;

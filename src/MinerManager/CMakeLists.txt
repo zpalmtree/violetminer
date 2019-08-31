@@ -6,9 +6,3 @@ set(miner_manager_source_files
 
 # Add the library to be linked against, with the previously specified source files
 add_library(MinerManager ${miner_manager_source_files})
-
-if (ENABLE_NVIDIA)
-    add_subdirectory(Nvidia)
-
-    target_link_libraries(MinerManager NvidiaManager)
-endif()

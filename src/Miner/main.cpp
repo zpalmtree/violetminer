@@ -19,7 +19,7 @@
 #endif
 
 #if defined(NVIDIA_ENABLED)
-#include "MinerManager/Nvidia/NvidiaManager.h"
+#include "Backend/Nvidia/NvidiaUtils.h"
 #endif
 
 std::vector<Pool> getDevPools()

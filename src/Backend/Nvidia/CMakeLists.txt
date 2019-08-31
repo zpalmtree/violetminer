@@ -2,6 +2,13 @@
 set(nvidia_backend_source_files
     Nvidia.cpp
     NvidiaHash.cpp
+    NvidiaUtils.cu
 )
 
 add_library(NvidiaBackend ${nvidia_backend_source_files})
+
+target_link_libraries(NvidiaBackend Nvidia)
+
+target_compile_features(NvidiaBackend PUBLIC cxx_std_11)
+
+set_target_properties(NvidiaBackend PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

@@ -21,7 +21,7 @@
 #endif
 
 #if defined(NVIDIA_ENABLED)
-#include "MinerManager/Nvidia/NvidiaManager.h"
+#include "Backend/Nvidia/NvidiaUtils.h"
 #else
 std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual() { return {}; }
 #endif

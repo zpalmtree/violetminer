@@ -24,7 +24,6 @@ MinerManager::MinerManager(
     const HardwareConfig hardwareConfig,
     const bool areDevPool):
     m_pool(pool),
-    m_hardwareConfig(hardwareConfig),
     m_hashManager(pool),
     m_gen(m_device())
 {
@@ -43,8 +42,8 @@ MinerManager::MinerManager(
     }
 
     const bool allNvidiaGPUsDisabled = std::none_of(
-        m_hardwareConfig.nvidia.devices.begin(),
-        m_hardwareConfig.nvidia.devices.end(),
+        hardwareConfig.nvidia.devices.begin(),
+        hardwareConfig.nvidia.devices.end(),
         [](const auto device)
         {
             return device.enabled;
@@ -143,81 +142,6 @@ void MinerManager::resumeMining()
 
     /* Launch off the thread to print stats regularly */
     m_statsThread = std::thread(&MinerManager::statPrinter, this);
-}
-
-void MinerManager::startNvidiaMining()
-{
-    #if defined(NVIDIA_ENABLED)
-    int maxErrorCount = 5;
-    int currentErrorCount = 0;
-
-    auto resetErrorCountPeriod = std::chrono::seconds(20);
-
-    auto lastErrorAt = std::chrono::high_resolution_clock::now();
-
-    const bool allNvidiaGPUsDisabled = std::none_of(
-        m_hardwareConfig.nvidia.devices.begin(),
-        m_hardwareConfig.nvidia.devices.end(),
-        [](const auto device)
-        {
-            return device.enabled;
-        }
-    );
-
-    while (true)
-    {
-        /* If we have at least one device, start nvidia mining */
-        if (!allNvidiaGPUsDisabled)
-        {
-            try
-            {
-                //resumeNvidiaMining();
-            }
-            catch (const std::exception &e)
-            {
-                const auto now = std::chrono::high_resolution_clock::now();
-
-                /* If we haven't had an error in the last 20 seconds, reset the error
-                   count */
-                if (now - resetErrorCountPeriod > lastErrorAt)
-                {
-                    currentErrorCount = 0;
-                }
-                /* Otherwise, increment the error count */
-                else
-                {
-                    currentErrorCount++;
-                }
-
-                /* If we've had more than 5 crashes in ~100 seconds, stop
-                   attempting to restart, it ain't working. */
-                if (currentErrorCount > maxErrorCount)
-                {
-                    std::cout << WarningMsg("Too many errors in a short period of time. Cancelling Nvidia Mining.\n") << std::endl;
-                    return;
-                }
-
-                lastErrorAt = now;
-
-                std::cout << WarningMsg("Error performining mining on Nvidia GPU: " + std::string(e.what())) << std::endl;
-                std::cout << InformationMsg("Restarting Nvidia mining...\n") << std::endl;
-
-                /* TODO: Remove */
-                return;
-
-                continue;
-            }
-        }
-        else
-        {
-            std::cout << WarningMsg("No Nvidia GPUs available, or all disabled, not starting Nvidia mining") << std::endl;
-            return;
-        }
-
-        /* TODO: Remove */
-        return;
-    }
-    #endif
 }
 
 void MinerManager::pauseMining()

@@ -73,16 +73,3 @@ void printNvidiaHeader()
 
     std::cout << std::endl;
 }
-
-void resumeNvidiaMining()
-{
-    int numberDevices;
-    cudaGetDeviceCount(&numberDevices);
-
-    if (numberDevices == 0)
-    {
-        return;
-    }
-
-    hash();
-}
