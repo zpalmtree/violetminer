@@ -28,7 +28,7 @@ class PoolCommunication
 
     /* Submit a *valid* share to the pool. */
     void submitShare(
-        const std::vector<uint8_t> &hash,
+        const uint8_t *hash,
         const std::string jobID,
         const uint32_t nonce);
 

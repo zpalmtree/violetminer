@@ -6,28 +6,29 @@
 
 #include "Argon2/Argon2.h"
 #include "Types/IHashingAlgorithm.h"
+#include "Miner/GetConfig.h"
 
-class NvidiaHash : virtual public IHashingAlgorithm
+class NvidiaHash
 {
   public:
     NvidiaHash(
         const uint32_t memoryKB,
-        const uint32_t iterations,
-        const uint32_t threads,
-        const uint32_t saltLength,
-        const Constants::ArgonVariant variant);
+        const uint32_t iterations);
 
-    virtual void init(std::vector<uint8_t> &initialInput);
+    void init(const std::vector<uint8_t> &initialInput, const NvidiaDevice &gpu);
 
-    virtual void reinit(const std::vector<uint8_t> &input);
-
-    virtual std::vector<uint8_t> hash(std::vector<uint8_t> &input);
+    std::vector<uint8_t> hash(
+        std::vector<uint8_t> &input,
+        const uint32_t localNonce,
+        uint64_t *grids,
+        uint8_t *threads);
 
   private:
 
-    Argon2 m_argonInstance;
-
-    const uint32_t m_saltLength;
+    const uint32_t m_memory;
+    const uint32_t m_time;
 
     std::vector<uint8_t> m_salt;
+
+    NvidiaDevice m_gpu;
 };

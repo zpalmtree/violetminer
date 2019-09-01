@@ -203,7 +203,7 @@ Job PoolCommunication::getJob()
 }
 
 void PoolCommunication::submitShare(
-    const std::vector<uint8_t> &hash,
+    const uint8_t *hash,
     const std::string jobID,
     const uint32_t nonce)
 {
@@ -213,7 +213,7 @@ void PoolCommunication::submitShare(
             {"id", m_currentPool.loginID},
             {"job_id", jobID},
             {"nonce", Utilities::toHex(nonce)},
-            {"result", Utilities::toHex(hash)},
+            {"result", Utilities::toHex(hash, 32)},
             {"rigid", m_currentPool.rigID},
             {"agent", m_currentPool.getAgent()},
         }},

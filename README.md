@@ -2,7 +2,7 @@
 
 ![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/500px-Argon_discharge_tube.jpg)
 
-A CPU miner for Argon2i, Argon2d, and Argon2id.
+A CPU and NVIDIA miner for TurtleCoin / Chukwa / Argon2id / WrkzCoin.
 
 #### Master Build Status
 
@@ -27,6 +27,7 @@ Want the miner to support another argon coin? Open an issue, or even better, ope
 ## Notes
 
 * Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations.
+* Supports NVIDIA GPUs.
 * You can set a priority to a pool to determine which ones are tried first. A smaller priority number means we will connect to it first. 0 = highest priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
 
 * Dev fee is 1%.

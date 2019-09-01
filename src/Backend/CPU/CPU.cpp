@@ -122,7 +122,7 @@ void CPU::hash(const uint32_t threadNumber)
 
             const auto hash = algorithm->hash(job.rawBlob);
 
-            m_submitHash({ hash, job.jobID, *job.nonce(), job.target });
+            m_submitHash({ hash.data(), job.jobID, *job.nonce(), job.target });
 
             localNonce += m_hardwareConfig.cpu.threadCount;
         }

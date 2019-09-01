@@ -18,10 +18,10 @@ HashManager::HashManager(
 }
 
 bool isHashValidForTarget(
-    const std::vector<uint8_t> &hash,
+    const uint8_t *hash,
     const uint64_t target)
 {
-    return *reinterpret_cast<const uint64_t *>(hash.data() + 24) < target;
+    return *reinterpret_cast<const uint64_t *>(hash + 24) < target;
 }
 
 void HashManager::submitHash(const JobSubmit &jobSubmit)

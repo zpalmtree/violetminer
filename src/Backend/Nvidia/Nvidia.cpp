@@ -6,8 +6,12 @@
 #include "Backend/Nvidia/Nvidia.h"
 //////////////////////////////////
 
+#include <iostream>
+
 #include "ArgonVariants/Variants.h"
 #include "Backend/Nvidia/NvidiaHash.h"
+#include "Utilities/ColouredMsg.h"
+#include "Nvidia/Argon2.h"
 
 Nvidia::Nvidia(
     const HardwareConfig &hardwareConfig,
@@ -92,29 +96,17 @@ std::vector<PerformanceStats> Nvidia::getPerformanceStats()
     return {};
 }
 
-std::shared_ptr<IHashingAlgorithm> getNvidiaMiningAlgorithm(const std::string &algorithm)
+std::shared_ptr<NvidiaHash> getNvidiaMiningAlgorithm(const std::string &algorithm)
 {
     switch(ArgonVariant::algorithmNameToCanonical(algorithm))
     {
         case ArgonVariant::Chukwa:
         {
-            return std::make_shared<NvidiaHash>(
-                512,
-                3,
-                1,
-                16,
-                Constants::ARGON2ID
-            );
+            return std::make_shared<NvidiaHash>(512, 3);
         }
         case ArgonVariant::ChukwaWrkz:
         {
-            return std::make_shared<NvidiaHash>(
-                256,
-                4,
-                1,
-                16,
-                Constants::ARGON2ID
-            );
+            return std::make_shared<NvidiaHash>(256, 4);
         }
         default:
         {
@@ -125,11 +117,16 @@ std::shared_ptr<IHashingAlgorithm> getNvidiaMiningAlgorithm(const std::string &a
 
 void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 {
+    const size_t THREADS = 256;
+
+    uint64_t *grids = allocateScratchpads();
+    uint8_t *results = allocateResults();
+
     while (!m_shouldStop)
     {
         /* Offset the nonce by our thread number so each thread has an individual
            nonce */
-        uint32_t localNonce = m_nonce + threadNumber;
+        uint32_t localNonce = m_nonce + (threadNumber * THREADS);
 
         Job job = m_currentJob;
 
@@ -138,40 +135,30 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         auto algorithm = getNvidiaMiningAlgorithm(m_currentJob.algorithm);
 
         /* Let the algorithm perform any necessary initialization */
-        algorithm->init(m_currentJob.rawBlob);
-        algorithm->reinit(m_currentJob.rawBlob);
+        algorithm->init(m_currentJob.rawBlob, gpu);
 
         while (!m_newJobAvailable[threadNumber])
         {
-            /* If nicehash mode is enabled, we are only allowed to alter 3 bytes
-               in the nonce, instead of four. The first byte is reserved for nicehash
-               to do with as they like.
-               To achieve this, we wipe the top byte (localNonce & 0x00FFFFFF) of
-               local nonce. We then wipe the bottom 3 bytes of job.nonce
-               (*job.nonce() & 0xFF000000). Finally, we AND them together, so the
-               top byte of the nonce is reserved for nicehash.
-               See further https://github.com/nicehash/Specifications/blob/master/NiceHash_CryptoNight_modification_v1.0.txt
-               Note that the above specification indicates that the final byte of
-               the nonce is reserved, but in fact it is the first byte that is 
-               reserved. */
-            if (isNiceHash)
+            try
             {
-                *job.nonce() = (localNonce & 0x00FFFFFF) | (*job.nonce() & 0xFF000000);
+                const auto hashes = algorithm->hash(job.rawBlob, localNonce, grids, results);
+
+                for (int i = 0; i < THREADS; i++)
+                {
+                    m_submitHash({ &hashes[i * 32], job.jobID, localNonce + i, job.target });
+                }
+
+                localNonce += (m_numAvailableGPUs * THREADS);
             }
-            else
+            catch (const std::exception &e)
             {
-                *job.nonce() = localNonce;
+                std::cout << WarningMsg("Caught unexpected error from GPU hasher: " + std::string(e.what())) << std::endl;
             }
-
-            const auto hash = algorithm->hash(job.rawBlob);
-
-            m_submitHash({ hash, job.jobID, *job.nonce(), job.target });
-
-            localNonce += m_numAvailableGPUs;
         }
 
         /* Switch to new job. */
         m_newJobAvailable[threadNumber] = false;
     }
 
+    freeMemory(grids, results);
 }

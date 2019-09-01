@@ -116,6 +116,16 @@ namespace Utilities
         return result;
     }
 
+    std::string toHex(const uint8_t *input, size_t inputLength)
+    {
+        std::string result;
+        result.resize(inputLength * 2);
+
+        toHex(input, result.data(), inputLength);
+
+        return result;
+    }
+
     std::string toHex(const std::vector<uint8_t> &input)
     {
         std::string result;

@@ -9,29 +9,35 @@
 #include "Nvidia/Argon2.h"
 #include "Config/Config.h"
 
-void NvidiaHash::init(std::vector<uint8_t> &initialInput)
-{
-    return;
-}
-
 /* Salt is not altered by nonce. We can initialize it once per job here. */
-void NvidiaHash::reinit(const std::vector<uint8_t> &input)
+void NvidiaHash::init(const std::vector<uint8_t> &input, const NvidiaDevice &gpu)
 {
-    m_salt = std::vector<uint8_t>(input.begin(), input.begin() + m_saltLength);
+    m_salt = std::vector<uint8_t>(input.begin(), input.begin() + 16);
+    m_gpu = gpu;
 }
 
-std::vector<uint8_t> NvidiaHash::hash(std::vector<uint8_t> &input)
+std::vector<uint8_t> NvidiaHash::hash(
+    std::vector<uint8_t> &input,
+    const uint32_t localNonce,
+    uint64_t *grids,
+    uint8_t *results)
 {
-    return nvidiaHash(input, m_salt);
+    return nvidiaHash(
+        input,
+        m_salt,
+        m_memory,
+        m_time,
+        m_gpu.id,
+        localNonce,
+        grids,
+        results
+    ); 
 }
 
 NvidiaHash::NvidiaHash(
     const uint32_t memoryKB,
-    const uint32_t iterations,
-    const uint32_t threads,
-    const uint32_t saltLength,
-    const Constants::ArgonVariant variant):
-    m_argonInstance(variant, {}, {}, iterations, memoryKB, threads, 32, Config::config.optimizationMethod),
-    m_saltLength(saltLength)
+    const uint32_t iterations):
+    m_memory(memoryKB),
+    m_time(iterations)
 {
 }

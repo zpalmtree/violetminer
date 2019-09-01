@@ -10,7 +10,7 @@
 struct JobSubmit
 {
     /* The actual hash we made */
-    std::vector<uint8_t> hash;
+    const uint8_t *hash;
 
     /* Identifier for this job for the pool */
     std::string jobID;
