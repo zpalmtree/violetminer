@@ -51,9 +51,21 @@ MinerManager::MinerManager(
     );
 
     #if defined(NVIDIA_ENABLED)
+    const auto submitValid = [this](const JobSubmit &jobSubmit)
+    {
+        m_hashManager.submitValidHash(jobSubmit);
+    };
+
+    const auto increment = [this](const uint32_t hashesPerformed)
+    {
+        m_hashManager.incrementHashesPerformed(hashesPerformed);
+    };
+
     if (!allNvidiaGPUsDisabled)
     {
-        m_enabledBackends.push_back(std::make_shared<Nvidia>(hardwareConfig, submit));
+        m_enabledBackends.push_back(
+            std::make_shared<Nvidia>(hardwareConfig, submitValid, increment)
+        );
     }
     else if (!areDevPool)
     {

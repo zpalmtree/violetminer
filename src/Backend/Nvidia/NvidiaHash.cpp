@@ -10,28 +10,15 @@
 #include "Config/Config.h"
 
 /* Salt is not altered by nonce. We can initialize it once per job here. */
-void NvidiaHash::init(const std::vector<uint8_t> &input, const NvidiaDevice &gpu)
+void NvidiaHash::init(const NvidiaState &state)
 {
-    m_salt = std::vector<uint8_t>(input.begin(), input.begin() + 16);
-    m_gpu = gpu;
+    m_state = state;
 }
 
-std::vector<uint8_t> NvidiaHash::hash(
-    std::vector<uint8_t> &input,
-    const uint32_t localNonce,
-    uint64_t *grids,
-    uint8_t *results)
+HashResult NvidiaHash::hash(const uint32_t startNonce)
 {
-    return nvidiaHash(
-        input,
-        m_salt,
-        m_memory,
-        m_time,
-        m_gpu.id,
-        localNonce,
-        grids,
-        results
-    ); 
+    m_state.localNonce = startNonce;
+    return nvidiaHash(m_state);
 }
 
 NvidiaHash::NvidiaHash(

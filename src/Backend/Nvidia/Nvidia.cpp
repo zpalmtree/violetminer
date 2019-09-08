@@ -15,9 +15,11 @@
 
 Nvidia::Nvidia(
     const HardwareConfig &hardwareConfig,
-    const std::function<void(const JobSubmit &jobSubmit)> &submitHashCallback):
+    const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
+    const std::function<void(const uint32_t hashesPerformed)> &incrementHashesPerformedCallback):
     m_hardwareConfig(hardwareConfig),
-    m_submitHash(submitHashCallback)
+    m_submitValidHash(submitValidHashCallback),
+    m_incrementHashesPerformed(incrementHashesPerformedCallback)
 {
     std::copy_if(
         hardwareConfig.nvidia.devices.begin(),
@@ -117,42 +119,82 @@ std::shared_ptr<NvidiaHash> getNvidiaMiningAlgorithm(const std::string &algorith
 
 void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 {
-    const size_t THREADS = 256;
+    NvidiaState state;
 
-    uint64_t *grids = allocateScratchpads();
-    uint8_t *results = allocateResults();
+    std::string currentAlgorithm;
 
     while (!m_shouldStop)
     {
-        /* Offset the nonce by our thread number so each thread has an individual
-           nonce */
-        uint32_t localNonce = m_nonce + (threadNumber * THREADS);
-
         Job job = m_currentJob;
 
-        const bool isNiceHash = job.isNiceHash;
+        auto algorithm = getNvidiaMiningAlgorithm(job.algorithm);
 
-        auto algorithm = getNvidiaMiningAlgorithm(m_currentJob.algorithm);
+        /* New job, reinitialize memory, etc */
+        if (job.algorithm != currentAlgorithm)
+        {
+            freeState(state);
+            state = initializeState(gpu.id);
+            currentAlgorithm = job.algorithm;
+        }
+
+        std::vector<uint8_t> salt(job.rawBlob.begin(), job.rawBlob.begin() + 16);
+
+        /* TODO: Offset */
+        uint32_t startNonce = m_nonce;
+
+        initJob(state, job.rawBlob, salt, startNonce, job.target);
 
         /* Let the algorithm perform any necessary initialization */
-        algorithm->init(m_currentJob.rawBlob, gpu);
+        algorithm->init(state);
 
         while (!m_newJobAvailable[threadNumber])
         {
             try
             {
-                const auto hashes = algorithm->hash(job.rawBlob, localNonce, grids, results);
+                const auto hashResult = algorithm->hash(startNonce);
 
-                for (int i = 0; i < THREADS; i++)
+                /* Increment the number of hashes we performed so the hashrate
+                   printer is accurate */
+                m_incrementHashesPerformed(state.launchParams.noncesPerRun);
+
+                /* Woot, found a valid share, submit it */
+                if (hashResult.success)
                 {
-                    m_submitHash({ &hashes[i * 32], job.jobID, localNonce + i, job.target });
+                    m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target });
                 }
 
-                localNonce += (m_numAvailableGPUs * THREADS);
+                /* Increment nonce for next block */
+
+                /* TODO: This does NOT work. Different GPU's will perform
+                   different amount of hashes.
+
+                   We also need to think about CPUs which are hashing in
+                   a different round rate...
+
+                   What we need is
+
+                   localNonce +=
+                   CPU thread count 
+                 + sum(nvidiaGPUs.map((gpu) => getHashesPerRound(gpu)))
+                 + sum(amdGPUs.map((gpu) => getHashesPerRound(gpu)))
+
+                 We probably want to calculate this at startup and add it as
+                 a property to hardware config */
+                startNonce += (m_numAvailableGPUs * state.launchParams.noncesPerRun);
             }
             catch (const std::exception &e)
             {
                 std::cout << WarningMsg("Caught unexpected error from GPU hasher: " + std::string(e.what())) << std::endl;
+
+                try
+                {
+                    freeState(state);
+                }
+                catch (const std::exception &)
+                {
+                }
+
+                return;
             }
         }
 
@@ -160,5 +202,5 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         m_newJobAvailable[threadNumber] = false;
     }
 
-    freeMemory(grids, results);
+    freeState(state);
 }

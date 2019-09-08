@@ -14,7 +14,8 @@ class Nvidia : virtual public IBackend
   public:
     Nvidia(
         const HardwareConfig &hardwareConfig,
-        const std::function<void(const JobSubmit &jobSubmit)> &submitHashCallback);
+        const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
+        const std::function<void(const uint32_t hashesPerformed)> &incrementHashesPerformedCallback);
 
     virtual void start(const Job &job, const uint32_t initialNonce);
 
@@ -46,8 +47,11 @@ class Nvidia : virtual public IBackend
     /* A bool for each thread indicating if they should swap to a new job */
     std::vector<bool> m_newJobAvailable;
 
-    /* Used to submit a hash back to the miner manager */
-    const std::function<void(const JobSubmit &jobSubmit)> m_submitHash;
+    /* Used to submit a valid hash back to the miner manager */
+    const std::function<void(const JobSubmit &jobSubmit)> m_submitValidHash;
+
+    /* Used to increment the number of hashes we've performed */
+    const std::function<void(const uint32_t hashesPerformed)> m_incrementHashesPerformed;
 
     /* Enabled nvidia devices grabbed from the config */
     std::vector<NvidiaDevice> m_availableDevices;

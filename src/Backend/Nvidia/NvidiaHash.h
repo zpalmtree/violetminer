@@ -5,8 +5,9 @@
 #pragma once
 
 #include "Argon2/Argon2.h"
-#include "Types/IHashingAlgorithm.h"
+#include "Types/PoolMessage.h"
 #include "Miner/GetConfig.h"
+#include "Nvidia/Argon2.h"
 
 class NvidiaHash
 {
@@ -15,20 +16,14 @@ class NvidiaHash
         const uint32_t memoryKB,
         const uint32_t iterations);
 
-    void init(const std::vector<uint8_t> &initialInput, const NvidiaDevice &gpu);
+    void init(const NvidiaState &state);
 
-    std::vector<uint8_t> hash(
-        std::vector<uint8_t> &input,
-        const uint32_t localNonce,
-        uint64_t *grids,
-        uint8_t *threads);
+    HashResult hash(const uint32_t startNonce);
 
   private:
 
     const uint32_t m_memory;
     const uint32_t m_time;
 
-    std::vector<uint8_t> m_salt;
-
-    NvidiaDevice m_gpu;
+    NvidiaState m_state;
 };

@@ -16,6 +16,14 @@ class HashManager
   public:
     HashManager(const std::shared_ptr<PoolCommunication> pool);
 
+    /* Used to increment the number of hashes performed. Should be used along
+       with submitValidHash. submitHash will increment the hashes performed
+       on your behalf. */
+    void incrementHashesPerformed(const uint32_t hashesPerformed);
+
+    /* Call this to submit a hash to the pool that is above the diff. */
+    void submitValidHash(const JobSubmit &jobSubmit);
+
     /* Call this to submit a hash to the pool. We will check the diff. */
     void submitHash(const JobSubmit &jobSubmit);
 

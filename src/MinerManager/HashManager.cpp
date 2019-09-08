@@ -24,19 +24,29 @@ bool isHashValidForTarget(
     return *reinterpret_cast<const uint64_t *>(hash + 24) < target;
 }
 
-void HashManager::submitHash(const JobSubmit &jobSubmit)
+void HashManager::incrementHashesPerformed(const uint32_t hashesPerformed)
 {
     if (m_totalHashes == 0)
     {
         m_effectiveStartTime = std::chrono::high_resolution_clock::now();
     }
 
-    m_totalHashes++;
+    m_totalHashes += hashesPerformed;
+}
+
+void HashManager::submitValidHash(const JobSubmit &jobSubmit)
+{
+    m_submittedHashes++;
+    m_pool->submitShare(jobSubmit.hash, jobSubmit.jobID, jobSubmit.nonce);
+}
+
+void HashManager::submitHash(const JobSubmit &jobSubmit)
+{
+    incrementHashesPerformed(1);
 
     if (isHashValidForTarget(jobSubmit.hash, jobSubmit.target))
     {
-        m_submittedHashes++;
-        m_pool->submitShare(jobSubmit.hash, jobSubmit.jobID, jobSubmit.nonce);
+        submitValidHash(jobSubmit);
     }
 }
 
