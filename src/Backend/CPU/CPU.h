@@ -38,7 +38,7 @@ class CPU : virtual public IBackend
     std::atomic<bool> m_shouldStop = false;
 
     /* Threads to launch, whether CPU/GPU is enabled, etc */
-    const HardwareConfig m_hardwareConfig;
+    HardwareConfig m_hardwareConfig;
 
     /* Worker threads */
     std::vector<std::thread> m_threads;

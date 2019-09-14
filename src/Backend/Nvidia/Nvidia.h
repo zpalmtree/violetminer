@@ -15,7 +15,9 @@ class Nvidia : virtual public IBackend
     Nvidia(
         const HardwareConfig &hardwareConfig,
         const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
-        const std::function<void(const uint32_t hashesPerformed)> &incrementHashesPerformedCallback);
+        const std::function<void(
+            const uint32_t hashesPerformed,
+            const std::string &deviceName)> &incrementHashesPerformedCallback);
 
     virtual void start(const Job &job, const uint32_t initialNonce);
 
@@ -51,7 +53,9 @@ class Nvidia : virtual public IBackend
     const std::function<void(const JobSubmit &jobSubmit)> m_submitValidHash;
 
     /* Used to increment the number of hashes we've performed */
-    const std::function<void(const uint32_t hashesPerformed)> m_incrementHashesPerformed;
+    const std::function<void(
+        const uint32_t hashesPerformed,
+        const std::string &deviceName)> m_incrementHashesPerformed;
 
     /* Enabled nvidia devices grabbed from the config */
     std::vector<NvidiaDevice> m_availableDevices;

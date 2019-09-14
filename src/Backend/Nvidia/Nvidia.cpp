@@ -16,7 +16,9 @@
 Nvidia::Nvidia(
     const HardwareConfig &hardwareConfig,
     const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
-    const std::function<void(const uint32_t hashesPerformed)> &incrementHashesPerformedCallback):
+    const std::function<void(
+        const uint32_t hashesPerformed,
+        const std::string &deviceName)> &incrementHashesPerformedCallback):
     m_hardwareConfig(hardwareConfig),
     m_submitValidHash(submitValidHashCallback),
     m_incrementHashesPerformed(incrementHashesPerformedCallback)
@@ -123,6 +125,8 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 
     std::string currentAlgorithm;
 
+    const std::string gpuName = gpu.name + "-" + std::to_string(gpu.id);
+
     while (!m_shouldStop)
     {
         Job job = m_currentJob;
@@ -140,7 +144,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 
         std::vector<uint8_t> salt(job.rawBlob.begin(), job.rawBlob.begin() + 16);
 
-        uint32_t startNonce = m_nonce + m_hardwareConfig.nvidia.devices[threadNumber].nonceOffset;
+        uint32_t startNonce = m_nonce + m_hardwareConfig.nvidia.devices[gpu.id].nonceOffset;
 
         initJob(state, job.rawBlob, salt, startNonce, job.target);
 
@@ -155,12 +159,12 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 
                 /* Increment the number of hashes we performed so the hashrate
                    printer is accurate */
-                m_incrementHashesPerformed(state.launchParams.noncesPerRun);
+                m_incrementHashesPerformed(state.launchParams.noncesPerRun, gpuName);
 
                 /* Woot, found a valid share, submit it */
                 if (hashResult.success)
                 {
-                    m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target });
+                    m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target, gpuName });
                 }
 
                 /* Increment nonce for next block */

@@ -6,8 +6,10 @@
 
 #include <chrono>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
+#include "Types/HashDevice.h"
 #include "Types/JobSubmit.h"
 #include "PoolCommunication/PoolCommunication.h"
 
@@ -19,7 +21,9 @@ class HashManager
     /* Used to increment the number of hashes performed. Should be used along
        with submitValidHash. submitHash will increment the hashes performed
        on your behalf. */
-    void incrementHashesPerformed(const uint32_t hashesPerformed);
+    void incrementHashesPerformed(
+        const uint32_t hashesPerformed,
+        const std::string &deviceName);
 
     /* Call this to submit a hash to the pool that is above the diff. */
     void submitValidHash(const JobSubmit &jobSubmit);
@@ -61,4 +65,6 @@ class HashManager
     std::chrono::time_point<std::chrono::high_resolution_clock> m_pauseTime;
 
     bool m_paused = false;
+
+    std::unordered_map<std::string, HashDevice> m_hashProducers;
 };

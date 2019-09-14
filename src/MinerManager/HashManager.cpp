@@ -24,12 +24,16 @@ bool isHashValidForTarget(
     return *reinterpret_cast<const uint64_t *>(hash + 24) < target;
 }
 
-void HashManager::incrementHashesPerformed(const uint32_t hashesPerformed)
+void HashManager::incrementHashesPerformed(
+    const uint32_t hashesPerformed,
+    const std::string &device)
 {
     if (m_totalHashes == 0)
     {
         m_effectiveStartTime = std::chrono::high_resolution_clock::now();
     }
+
+    m_hashProducers[device].totalHashes += hashesPerformed;
 
     m_totalHashes += hashesPerformed;
 }
@@ -42,7 +46,7 @@ void HashManager::submitValidHash(const JobSubmit &jobSubmit)
 
 void HashManager::submitHash(const JobSubmit &jobSubmit)
 {
-    incrementHashesPerformed(1);
+    incrementHashesPerformed(1, jobSubmit.hardwareIdentifier);
 
     if (isHashValidForTarget(jobSubmit.hash, jobSubmit.target))
     {
@@ -88,18 +92,42 @@ void HashManager::printStats()
     /* Calculating in milliseconds for more accuracy */
     const auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(elapsedTime).count();
 
-    m_pool->printPool();
-
-    std::cout << WhiteMsg("Hashrate: ");
-
-    if (milliseconds != 0 && m_totalHashes != 0)
+    for (const auto &[device, hashes] : m_hashProducers)
     {
-        const double hashratePerSecond = (1000 * static_cast<double>(m_totalHashes) / milliseconds);
-        std::cout << WhiteMsg(hashratePerSecond) << WhiteMsg(" H/s") << std::endl;
+        m_pool->printPool();
+
+        std::cout << WhiteMsg(device, 20);
+
+        if (milliseconds != 0 && hashes.totalHashes != 0)
+        {
+            const double hashratePerSecond = (1000 * static_cast<double>(hashes.totalHashes) / milliseconds);
+
+            std::cout << std::fixed << std::setprecision(2) << "| "
+                      << WhiteMsg(hashratePerSecond) << WhiteMsg(" H/s") << std::endl;
+        }
+        else
+        {
+            std::cout << WhiteMsg("N/A") << std::endl;
+        }
     }
-    else
+
+    if (m_hashProducers.size() > 1)
     {
-        std::cout << WhiteMsg("N/A") << std::endl;
+        m_pool->printPool();
+
+        std::cout << WhiteMsg("Total Hashrate", 20);
+
+        if (milliseconds != 0 && m_totalHashes != 0)
+        {
+            const double hashratePerSecond = (1000 * static_cast<double>(m_totalHashes) / milliseconds);
+
+            std::cout << std::fixed << std::setprecision(2) << "| "
+                      << WhiteMsg(hashratePerSecond) << WhiteMsg(" H/s") << std::endl;
+        }
+        else
+        {
+            std::cout << WhiteMsg("N/A") << std::endl;
+        }
     }
 
     double submitPercentage = 0;
@@ -116,8 +144,9 @@ void HashManager::printStats()
 
     m_pool->printPool();
 
-    std::cout << WhiteMsg("Accepted shares percentage: ")
+    std::cout << WhiteMsg("Accepted Shares", 20)
               << std::fixed << std::setprecision(2)
+              << "| "
               << WhiteMsg(submitPercentage) << WhiteMsg("%") << std::endl;
 }
 

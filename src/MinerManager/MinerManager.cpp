@@ -56,9 +56,9 @@ MinerManager::MinerManager(
         m_hashManager.submitValidHash(jobSubmit);
     };
 
-    const auto increment = [this](const uint32_t hashesPerformed)
+    const auto increment = [this](const uint32_t hashesPerformed, const std::string &deviceName)
     {
-        m_hashManager.incrementHashesPerformed(hashesPerformed);
+        m_hashManager.incrementHashesPerformed(hashesPerformed, deviceName);
     };
 
     if (!allNvidiaGPUsDisabled)

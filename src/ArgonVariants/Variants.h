@@ -64,7 +64,7 @@ namespace ArgonVariant
         return std::get<1>(*it);
     }
 
-    inline std::shared_ptr<IHashingAlgorithm> getCPUMiningAlgorithm(std::string algorithm)
+    inline std::shared_ptr<Argon2Hash> getCPUMiningAlgorithm(std::string algorithm)
     {
         switch(algorithmNameToCanonical(algorithm))
         {

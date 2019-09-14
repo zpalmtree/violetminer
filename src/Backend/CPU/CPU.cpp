@@ -82,6 +82,8 @@ std::vector<PerformanceStats> CPU::getPerformanceStats()
 
 void CPU::hash(const uint32_t threadNumber)
 {
+    std::string currentAlgorithm;
+
     while (!m_shouldStop)
     {
         /* Offset the nonce by our thread number so each thread has an individual
@@ -93,6 +95,12 @@ void CPU::hash(const uint32_t threadNumber)
         const bool isNiceHash = job.isNiceHash;
 
         auto algorithm = ArgonVariant::getCPUMiningAlgorithm(m_currentJob.algorithm);
+
+        if (job.algorithm != currentAlgorithm)
+        {
+            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
+            currentAlgorithm = job.algorithm;
+        }
 
         /* Let the algorithm perform any necessary initialization */
         algorithm->init(m_currentJob.rawBlob);
@@ -122,9 +130,9 @@ void CPU::hash(const uint32_t threadNumber)
 
             const auto hash = algorithm->hash(job.rawBlob);
 
-            m_submitHash({ hash.data(), job.jobID, *job.nonce(), job.target });
+            m_submitHash({ hash.data(), job.jobID, *job.nonce(), job.target, "CPU" });
 
-            localNonce += m_hardwareConfig.cpu.threadCount;
+            localNonce += m_hardwareConfig.noncesPerRound;
         }
 
         /* Switch to new job. */
