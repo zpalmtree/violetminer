@@ -136,15 +136,29 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         /* New job, reinitialize memory, etc */
         if (job.algorithm != currentAlgorithm)
         {
-            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
             freeState(state);
-            state = initializeState(gpu.id, algorithm->getMemory(), algorithm->getIterations());
+
+            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
+
+            state = initializeState(
+                gpu.id,
+                algorithm->getMemory(),
+                algorithm->getIterations()
+            );
+
             currentAlgorithm = job.algorithm;
         }
+
+        state.isNiceHash = job.isNiceHash;
 
         std::vector<uint8_t> salt(job.rawBlob.begin(), job.rawBlob.begin() + 16);
 
         uint32_t startNonce = m_nonce + m_hardwareConfig.nvidia.devices[gpu.id].nonceOffset;
+
+        if (job.isNiceHash)
+        {
+            startNonce = (startNonce & 0x00FFFFFF) | (*job.nonce() & 0xFF000000);
+        }
 
         initJob(state, job.rawBlob, salt, startNonce, job.target);
 
@@ -178,6 +192,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
                 {
                     freeState(state);
                 }
+                /* Free state will probably fail if we got a cuda exception */
                 catch (const std::exception &)
                 {
                 }

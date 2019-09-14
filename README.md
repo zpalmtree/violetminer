@@ -102,6 +102,8 @@ For example:
 Note that changing the `name` field does not do anything. It is only there to help you identify which device has which id.
 It's highly recommended that you don't change the `name` or `id` fields, or you may end up with quite a confusing result.
 
+You can always delete your config file, and let the program regenerate it, if you mess up.
+
 ### Optimization method
 
 By default, the program will automatically choose the optimization method to use.
