@@ -89,12 +89,29 @@ matrix:
     - RELEASE_FILENAME="violetminer-osx"
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
-    - CUDA_SUPPORT="OFF"
+    - CUDA_SUPPORT="ON"
     install:
     # Need to make sure that we have openssl installed
     - travis_retry brew install openssl || travis_retry brew upgrade openssl
     - brew link --force openssl
     - ln -s /usr/local/opt/openssl/include/openssl /usr/local/include
+    - curl -L http://developer.download.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.243_mac.dmg -o $HOME/cuda_10.1.243_mac.dmg
+    - curl -L https://developer.download.nvidia.com/compute/redist/cudnn/v7.6.2/cudnn-10.1-osx-x64-v7.6.2.24.tgz -o $HOME/cudnn-10.1-osx-x64-v7.6.2.24.tgz
+    - hdiutil mount $HOME/cuda_10.1.243_mac.dmg
+    - sleep 5
+    - ls -ltr /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS 
+    - sudo /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS/CUDAMacOSXInstaller --accept-eula --no-window; export BREW_STATUS=$? 
+    - tar xvf $HOME/cudnn-10.1-osx-x64-v7.6.2.24.tgz
+    - sudo cp ./cuda/include/*.h /usr/local/cuda/include/
+    - sudo cp ./cuda/lib/*.dylib /usr/local/cuda/lib/
+    - sudo cp ./cuda/lib/*.a /usr/local/cuda/lib/
+    - sudo cp /usr/local/cuda/lib/* /usr/local/lib/
+    - sudo cp /usr/local/cuda/lib/libcuda.dylib /usr/local/cuda/lib/stubs/
+    # work around issues with CUDA 10.1
+    - for f in /usr/local/cuda/lib/*.10.dylib; do sudo ln -s $f ${f/%.10.dylib/.10.1.dylib}; done
+    - cd $HOME/ccache-3.7/; ./configure; make; sudo make install; cd $TRAVIS_BUILD_DIR
+    - echo 'CCACHE_CC=/usr/local/cuda/bin/nvcc /usr/local/bin/ccache compiler "$@"' | sudo tee /usr/local/cuda/bin/nvcccache
+    - sudo chmod 755 /usr/local/cuda/bin/nvcccache
 
   # Arm (aarch64) cross compile
   - os: linux
