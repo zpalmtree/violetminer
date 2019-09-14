@@ -132,6 +132,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         /* New job, reinitialize memory, etc */
         if (job.algorithm != currentAlgorithm)
         {
+            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
             freeState(state);
             state = initializeState(gpu.id);
             currentAlgorithm = job.algorithm;
@@ -139,8 +140,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
 
         std::vector<uint8_t> salt(job.rawBlob.begin(), job.rawBlob.begin() + 16);
 
-        /* TODO: Offset */
-        uint32_t startNonce = m_nonce;
+        uint32_t startNonce = m_nonce + m_hardwareConfig.nvidia.devices[threadNumber].nonceOffset;
 
         initJob(state, job.rawBlob, salt, startNonce, job.target);
 
@@ -164,23 +164,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
                 }
 
                 /* Increment nonce for next block */
-
-                /* TODO: This does NOT work. Different GPU's will perform
-                   different amount of hashes.
-
-                   We also need to think about CPUs which are hashing in
-                   a different round rate...
-
-                   What we need is
-
-                   localNonce +=
-                   CPU thread count 
-                 + sum(nvidiaGPUs.map((gpu) => getHashesPerRound(gpu)))
-                 + sum(amdGPUs.map((gpu) => getHashesPerRound(gpu)))
-
-                 We probably want to calculate this at startup and add it as
-                 a property to hardware config */
-                startNonce += (m_numAvailableGPUs * state.launchParams.noncesPerRun);
+                startNonce += m_hardwareConfig.noncesPerRound;
             }
             catch (const std::exception &e)
             {

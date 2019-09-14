@@ -18,6 +18,8 @@ class NvidiaHash
 
     void init(const NvidiaState &state);
 
+    uint32_t getMemory() const { return m_memory; };
+
     HashResult hash(const uint32_t startNonce);
 
   private:

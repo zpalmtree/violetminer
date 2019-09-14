@@ -10,6 +10,10 @@
 #include "Types/Pool.h"
 #include "Argon2/Constants.h"
 
+#if defined(NVIDIA_ENABLED)
+#include "Backend/Nvidia/NvidiaUtils.h"
+#endif
+
 struct NvidiaDevice
 {
     bool enabled = true;
@@ -17,6 +21,17 @@ struct NvidiaDevice
     std::string name;
 
     uint16_t id;
+
+    uint32_t nonceOffset;
+
+    uint32_t getNoncesPerRound(const size_t scratchpadSize)
+    {
+        #if defined(NVIDIA_ENABLED)
+        return getNoncesPerRun(scratchpadSize, id);
+        #else
+        return 0;
+        #endif
+    }
 };
 
 struct AmdDevice
@@ -26,6 +41,13 @@ struct AmdDevice
     std::string name;
 
     uint16_t id;
+
+    uint32_t nonceOffset;
+
+    uint32_t getNoncesPerRound(const size_t scratchpadSize)
+    {
+        return 0;
+    }
 };
 
 struct CpuConfig
@@ -52,6 +74,38 @@ struct HardwareConfig
     CpuConfig cpu;
     NvidiaConfig nvidia;
     AmdConfig amd;
+
+    uint32_t noncesPerRound;
+
+    void initNonceOffsets(const size_t scratchpadSize)
+    {
+        uint32_t tmpNoncesPerRound = 0;
+
+        if (cpu.enabled)
+        {
+            tmpNoncesPerRound += cpu.threadCount;
+        }
+
+        for (auto &gpu : nvidia.devices)
+        {
+            if (gpu.enabled)
+            {
+                gpu.nonceOffset = noncesPerRound;
+                tmpNoncesPerRound += gpu.getNoncesPerRound(scratchpadSize);
+            }
+        }
+
+        for (auto &gpu : amd.devices)
+        {
+            if (gpu.enabled)
+            {
+                gpu.nonceOffset = noncesPerRound;
+                tmpNoncesPerRound += gpu.getNoncesPerRound(scratchpadSize);
+            }
+        }
+
+        noncesPerRound = tmpNoncesPerRound;
+    }
 };
 
 struct MinerConfig
