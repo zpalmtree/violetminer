@@ -134,7 +134,7 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         {
             m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
             freeState(state);
-            state = initializeState(gpu.id);
+            state = initializeState(gpu.id, algorithm->getMemory(), algorithm->getIterations());
             currentAlgorithm = job.algorithm;
         }
 
