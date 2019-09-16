@@ -41,7 +41,7 @@ matrix:
     - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
     - PATH=${CUDA_HOME}/bin:${PATH}
 
-  # Ubuntu, clang-6
+  # Ubuntu, clang-8
   - os: linux
     dist: xenial 
     compiler: clang
@@ -100,7 +100,6 @@ matrix:
     - curl -L https://developer.download.nvidia.com/compute/redist/cudnn/v7.6.2/cudnn-10.1-osx-x64-v7.6.2.24.tgz -o $HOME/cudnn-10.1-osx-x64-v7.6.2.24.tgz
     - hdiutil mount $HOME/cuda_10.1.243_mac.dmg
     - sleep 5
-    - ls -ltr /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS 
     - sudo /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS/CUDAMacOSXInstaller --accept-eula --no-window; export BREW_STATUS=$? 
     - tar xvf $HOME/cudnn-10.1-osx-x64-v7.6.2.24.tgz
     - sudo cp -r ./cuda/include/*.h /usr/local/cuda/include/
@@ -113,7 +112,6 @@ matrix:
     - cd $HOME/ccache-3.7/; ./configure; make; sudo make install; cd $TRAVIS_BUILD_DIR
     - echo 'CCACHE_CC=/usr/local/cuda/bin/nvcc /usr/local/bin/ccache compiler "$@"' | sudo tee /usr/local/cuda/bin/nvcccache
     - sudo chmod 755 /usr/local/cuda/bin/nvcccache
-    - /usr/local/cuda/bin/nvcc --version
     - PATH=/usr/local/cuda/bin:${PATH}
     - export CUDACXX=/usr/local/cuda/bin/nvcc
 
@@ -136,6 +134,8 @@ matrix:
     - RELEASE_FILETYPE="zip"
     - _DEPLOYABLE="true"
     script:
+    - curl https://developer.download.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.243_426.00_win10.exe -o cuda.exe
+    - powershell Start-Process -FilePath "C:\projects\deps\cuda.exe" -ArgumentList "-s nvcc_%CUDA_VER%" -Wait -NoNewWindow
     - mkdir build && cd build
     - export PATH=$MSBUILD_PATH:$PATH
     - ../scripts/win-install.bat
