@@ -13,4 +13,7 @@ target_compile_features(NvidiaBackend PUBLIC cxx_std_11)
 
 set_target_properties(NvidiaBackend PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(NvidiaBackend PROPERTIES CUDA_STANDARD 11)
-set_target_properties(NvidiaBackend PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
+if (MSVC)
+    set_target_properties(NvidiaBackend PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+endif()
