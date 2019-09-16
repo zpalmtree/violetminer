@@ -111,6 +111,9 @@ matrix:
     - cd $HOME/ccache-3.7/; ./configure; make; sudo make install; cd $TRAVIS_BUILD_DIR
     - echo 'CCACHE_CC=/usr/local/cuda/bin/nvcc /usr/local/bin/ccache compiler "$@"' | sudo tee /usr/local/cuda/bin/nvcccache
     - sudo chmod 755 /usr/local/cuda/bin/nvcccache
+    - /usr/local/cuda/bin/nvcc --version
+    - PATH=/usr/local/cuda/bin:${PATH}
+    - export CUDACXX=/usr/local/cuda/bin/nvcc
 
   # Arm (aarch64) cross compile
   - os: linux
