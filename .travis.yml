@@ -92,11 +92,11 @@ matrix:
     - ls -ltr /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS 
     - sudo /Volumes/CUDAMacOSXInstaller/CUDAMacOSXInstaller.app/Contents/MacOS/CUDAMacOSXInstaller --accept-eula --no-window; export BREW_STATUS=$? 
     - tar xvf $HOME/cudnn-10.1-osx-x64-v7.6.2.24.tgz
-    - sudo cp ./cuda/include/*.h /usr/local/cuda/include/
-    - sudo cp ./cuda/lib/*.dylib /usr/local/cuda/lib/
-    - sudo cp ./cuda/lib/*.a /usr/local/cuda/lib/
-    - sudo cp /usr/local/cuda/lib/* /usr/local/lib/
-    - sudo cp /usr/local/cuda/lib/libcuda.dylib /usr/local/cuda/lib/stubs/
+    - sudo cp -r ./cuda/include/*.h /usr/local/cuda/include/
+    - sudo cp -r ./cuda/lib/*.dylib /usr/local/cuda/lib/
+    - sudo cp -r ./cuda/lib/*.a /usr/local/cuda/lib/
+    - sudo cp -r /usr/local/cuda/lib/* /usr/local/lib/
+    - sudo cp -r /usr/local/cuda/lib/libcuda.dylib /usr/local/cuda/lib/stubs/
     # work around issues with CUDA 10.1
     - for f in /usr/local/cuda/lib/*.10.dylib; do sudo ln -s $f ${f/%.10.dylib/.10.1.dylib}; done
     - cd $HOME/ccache-3.7/; ./configure; make; sudo make install; cd $TRAVIS_BUILD_DIR
