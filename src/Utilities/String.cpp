@@ -111,7 +111,7 @@ namespace Utilities
         std::string result;
         result.resize(sizeof(input) * 2);
 
-        toHex(reinterpret_cast<const unsigned char*>(&input), result.data(), sizeof(input));
+        toHex(reinterpret_cast<const unsigned char*>(&input), &result[0], sizeof(input));
 
         return result;
     }
@@ -121,7 +121,7 @@ namespace Utilities
         std::string result;
         result.resize(inputLength * 2);
 
-        toHex(input, result.data(), inputLength);
+        toHex(input, &result[0], inputLength);
 
         return result;
     }
@@ -131,7 +131,7 @@ namespace Utilities
         std::string result;
         result.resize(input.size() * 2);
 
-        toHex(input.data(), result.data(), input.size());
+        toHex(input.data(), &result[0], input.size());
 
         return result;
     }
