@@ -45,7 +45,16 @@ matrix:
   - os: linux
     dist: xenial 
     compiler: clang
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-xenial-8
+        packages:
+          - clang-8
+          - libstdc++-8-dev
     env:
+    - MATRIX_EVAL="CC=clang-8.0 && CXX=clang++-8.0"
     - LABEL="linux"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
