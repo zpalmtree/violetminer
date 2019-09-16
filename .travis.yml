@@ -52,9 +52,10 @@ matrix:
         - llvm-toolchain-xenial-8
         packages:
           - clang-8
+          - clang-8
           - libstdc++-8-dev
     env:
-    - MATRIX_EVAL="CC=clang-8.0 && CXX=clang++-8.0"
+    - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
     - LABEL="linux"
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
@@ -78,6 +79,7 @@ matrix:
     - CUDA_HOME=/usr/local/cuda
     - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
     - PATH=${CUDA_HOME}/bin:${PATH}
+    - clang-8 --version
 
   # OSX, clang
   - os: osx
