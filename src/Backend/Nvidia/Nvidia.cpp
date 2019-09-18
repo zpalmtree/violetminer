@@ -14,7 +14,7 @@
 #include "Nvidia/Argon2.h"
 
 Nvidia::Nvidia(
-    const HardwareConfig &hardwareConfig,
+    const std::shared_ptr<HardwareConfig> &hardwareConfig,
     const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
     const std::function<void(
         const uint32_t hashesPerformed,
@@ -23,17 +23,14 @@ Nvidia::Nvidia(
     m_submitValidHash(submitValidHashCallback),
     m_incrementHashesPerformed(incrementHashesPerformedCallback)
 {
-    std::copy_if(
-        hardwareConfig.nvidia.devices.begin(),
-        hardwareConfig.nvidia.devices.end(),
-        std::back_inserter(m_availableDevices),
+    m_numAvailableGPUs = std::count_if(
+        hardwareConfig->nvidia.devices.begin(),
+        hardwareConfig->nvidia.devices.end(),
         [](const NvidiaDevice &device)
         {
             return device.enabled;
         }
     );
-
-    m_numAvailableGPUs = m_availableDevices.size();
 }
 
 void Nvidia::start(const Job &job, const uint32_t initialNonce)
@@ -52,9 +49,16 @@ void Nvidia::start(const Job &job, const uint32_t initialNonce)
     /* Indicate that there's no new jobs available to other threads */
     m_newJobAvailable = std::vector<bool>(m_numAvailableGPUs, false);
 
-    for (uint32_t i = 0; i < m_numAvailableGPUs; i++)
+    for (uint32_t i = 0; i < m_hardwareConfig->nvidia.devices.size(); i++)
     {
-        m_threads.push_back(std::thread(&Nvidia::hash, this, m_availableDevices[i], i));
+        auto &device = m_hardwareConfig->nvidia.devices[i];
+
+        if (!device.enabled)
+        {
+            continue;
+        }
+
+        m_threads.push_back(std::thread(&Nvidia::hash, this, std::ref(device), i));
     }
 }
 
@@ -119,13 +123,15 @@ std::shared_ptr<NvidiaHash> getNvidiaMiningAlgorithm(const std::string &algorith
     }
 }
 
-void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
+void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
 {
     NvidiaState state;
 
     std::string currentAlgorithm;
 
     const std::string gpuName = gpu.name + "-" + std::to_string(gpu.id);
+
+    NonceInfo nonceInfo;
 
     while (!m_shouldStop)
     {
@@ -138,8 +144,6 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
         {
             freeState(state);
 
-            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
-
             state = initializeState(
                 gpu.id,
                 algorithm->getMemory(),
@@ -147,29 +151,33 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
             );
 
             currentAlgorithm = job.algorithm;
+
+            gpu.noncesPerRound = state.launchParams.noncesPerRun;
+            gpu.checkedIn = true;
+
+            nonceInfo = m_hardwareConfig->getNonceOffsetInfo("nvidia", gpu.id);
         }
 
         state.isNiceHash = job.isNiceHash;
 
         std::vector<uint8_t> salt(job.rawBlob.begin(), job.rawBlob.begin() + 16);
 
-        uint32_t startNonce = m_nonce + m_hardwareConfig.nvidia.devices[gpu.id].nonceOffset;
+        uint32_t localNonce = m_nonce;
 
-        if (job.isNiceHash)
-        {
-            startNonce = (startNonce & 0x00FFFFFF) | (*job.nonce() & 0xFF000000);
-        }
-
-        initJob(state, job.rawBlob, salt, startNonce, job.target);
+        initJob(state, job.rawBlob, salt, job.target);
 
         /* Let the algorithm perform any necessary initialization */
         algorithm->init(state);
 
+        int i = 0;
+
         while (!m_newJobAvailable[threadNumber])
         {
+            const uint32_t ourNonce = localNonce + (i * nonceInfo.noncesPerRound) + nonceInfo.nonceOffset;
+
             try
             {
-                const auto hashResult = algorithm->hash(startNonce);
+                const auto hashResult = algorithm->hash(ourNonce);
 
                 /* Increment the number of hashes we performed so the hashrate
                    printer is accurate */
@@ -180,9 +188,6 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
                 {
                     m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target, gpuName });
                 }
-
-                /* Increment nonce for next block */
-                startNonce += m_hardwareConfig.noncesPerRound;
             }
             catch (const std::exception &e)
             {
@@ -196,8 +201,15 @@ void Nvidia::hash(const NvidiaDevice gpu, const uint32_t threadNumber)
                 catch (const std::exception &)
                 {
                 }
+            }
 
-                return;
+            i++;
+
+            /* If not all hardware has checked in with the new job, keep attempting
+             * to fetch it to ensure we're not doing duplicate work. */
+            if (!nonceInfo.allHardwareInitialized)
+            {
+                nonceInfo = m_hardwareConfig->getNonceOffsetInfo("cpu");
             }
         }
 

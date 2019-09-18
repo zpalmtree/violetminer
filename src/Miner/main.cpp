@@ -41,7 +41,7 @@ std::vector<Pool> getDevPools()
 void printWelcomeHeader(MinerConfig config)
 {
     std::cout << InformationMsg("* ") << WhiteMsg("ABOUT", 25) << InformationMsg("violetminer " + Constants::VERSION) << std::endl
-              << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.hardwareConfiguration.cpu.threadCount) << std::endl
+              << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.hardwareConfiguration->cpu.threadCount) << std::endl
               << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25);
 
     std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations;
@@ -78,9 +78,9 @@ void printWelcomeHeader(MinerConfig config)
 
     std::cout << std::endl << InformationMsg("* ") << WhiteMsg("CHOSEN OPTIMIZATION", 25);
     
-    if (config.hardwareConfiguration.cpu.optimizationMethod == Constants::AUTO)
+    if (config.hardwareConfiguration->cpu.optimizationMethod == Constants::AUTO)
     {
-        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration.cpu.optimizationMethod));
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod));
 
         const auto optimization = getAutoChosenOptimization();
 
@@ -93,13 +93,13 @@ void printWelcomeHeader(MinerConfig config)
             std::cout << SuccessMsg(" (" + Constants::optimizationMethodToString(optimization) + ")") << std::endl;
         }
     }
-    else if (config.hardwareConfiguration.cpu.optimizationMethod != Constants::NONE)
+    else if (config.hardwareConfiguration->cpu.optimizationMethod != Constants::NONE)
     {
-        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration.cpu.optimizationMethod)) << std::endl;
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod)) << std::endl;
     }
     else
     {
-        std::cout << WarningMsg(Constants::optimizationMethodToString(config.hardwareConfiguration.cpu.optimizationMethod)) << std::endl;
+        std::cout << WarningMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod)) << std::endl;
     }
 
 #if defined(NVIDIA_ENABLED)
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     MinerConfig config = getMinerConfig(argc, argv);
 
     /* Set the global config */
-    Config::config.optimizationMethod = config.hardwareConfiguration.cpu.optimizationMethod;
+    Config::config.optimizationMethod = config.hardwareConfiguration->cpu.optimizationMethod;
 
     /* If not initial startup, print welcome header */
     if (!config.interactive)

@@ -21,10 +21,11 @@
 
 MinerManager::MinerManager(
     const std::shared_ptr<PoolCommunication> pool,
-    const HardwareConfig hardwareConfig,
+    const std::shared_ptr<HardwareConfig> hardwareConfig,
     const bool areDevPool):
     m_pool(pool),
     m_hashManager(pool),
+    m_hardwareConfig(hardwareConfig),
     m_gen(m_device())
 {
     const auto submit = [this](const JobSubmit &jobSubmit)
@@ -32,7 +33,7 @@ MinerManager::MinerManager(
         m_hashManager.submitHash(jobSubmit);
     };
 
-    if (hardwareConfig.cpu.enabled)
+    if (hardwareConfig->cpu.enabled)
     {
         m_enabledBackends.push_back(std::make_shared<CPU>(hardwareConfig, submit));
     }
@@ -42,8 +43,8 @@ MinerManager::MinerManager(
     }
 
     const bool allNvidiaGPUsDisabled = std::none_of(
-        hardwareConfig.nvidia.devices.begin(),
-        hardwareConfig.nvidia.devices.end(),
+        hardwareConfig->nvidia.devices.begin(),
+        hardwareConfig->nvidia.devices.end(),
         [](const auto device)
         {
             return device.enabled;
@@ -83,6 +84,27 @@ void MinerManager::setNewJob(const Job &job)
 {
     /* Set new nonce */
     const uint32_t nonce = m_distribution(m_gen);
+
+    if (job.algorithm != m_currentAlgorithm)
+    {
+        m_currentAlgorithm = job.algorithm;
+
+        for (auto &gpu : m_hardwareConfig->nvidia.devices)
+        {
+            if (gpu.enabled)
+            {
+                gpu.checkedIn = false;
+            }
+        }
+
+        for (auto &gpu : m_hardwareConfig->amd.devices)
+        {
+            if (gpu.enabled)
+            {
+                gpu.checkedIn = false;
+            }
+        }
+    }
 
     for (auto &backend : m_enabledBackends)
     {

@@ -13,7 +13,7 @@ class CPU : virtual public IBackend
 {
   public:
     CPU(
-        const HardwareConfig &hardwareConfig,
+        const std::shared_ptr<HardwareConfig> &hardwareConfig,
         const std::function<void(const JobSubmit &jobSubmit)> &submitHashCallback);
 
     virtual void start(const Job &job, const uint32_t initialNonce);
@@ -38,7 +38,7 @@ class CPU : virtual public IBackend
     std::atomic<bool> m_shouldStop = false;
 
     /* Threads to launch, whether CPU/GPU is enabled, etc */
-    HardwareConfig m_hardwareConfig;
+    std::shared_ptr<HardwareConfig> m_hardwareConfig;
 
     /* Worker threads */
     std::vector<std::thread> m_threads;

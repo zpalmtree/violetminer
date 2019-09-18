@@ -20,7 +20,7 @@ class MinerManager
     /* CONSTRUCTOR */
     MinerManager(
         const std::shared_ptr<PoolCommunication> pool,
-        const HardwareConfig hardwareConfig,
+        const std::shared_ptr<HardwareConfig> hardwareConfig,
         const bool areDevPool);
 
     /* DESTRUCTOR */
@@ -68,4 +68,8 @@ class MinerManager
 
     /* CPU, GPU, etc hash backends that we are currently using */
     std::vector<std::shared_ptr<IBackend>> m_enabledBackends;
+
+    const std::shared_ptr<HardwareConfig> m_hardwareConfig;
+
+    std::string m_currentAlgorithm;
 };

@@ -6,10 +6,12 @@
 #include "Backend/CPU/CPU.h"
 ////////////////////////////
 
+#include <iostream>
+
 #include "Types/JobSubmit.h"
 
 CPU::CPU(
-    const HardwareConfig &hardwareConfig,
+    const std::shared_ptr<HardwareConfig> &hardwareConfig,
     const std::function<void(const JobSubmit &jobSubmit)> &submitHashCallback):
     m_hardwareConfig(hardwareConfig),
     m_submitHash(submitHashCallback)
@@ -30,9 +32,9 @@ void CPU::start(const Job &job, const uint32_t initialNonce)
     m_currentJob = job;
 
     /* Indicate that there's no new jobs available to other threads */
-    m_newJobAvailable = std::vector<bool>(m_hardwareConfig.cpu.threadCount, false);
+    m_newJobAvailable = std::vector<bool>(m_hardwareConfig->cpu.threadCount, false);
 
-    for (uint32_t i = 0; i < m_hardwareConfig.cpu.threadCount; i++)
+    for (uint32_t i = 0; i < m_hardwareConfig->cpu.threadCount; i++)
     {
         m_threads.push_back(std::thread(&CPU::hash, this, i));
     }
@@ -83,12 +85,11 @@ std::vector<PerformanceStats> CPU::getPerformanceStats()
 void CPU::hash(const uint32_t threadNumber)
 {
     std::string currentAlgorithm;
+    NonceInfo nonceInfo;
 
     while (!m_shouldStop)
     {
-        /* Offset the nonce by our thread number so each thread has an individual
-           nonce */
-        uint32_t localNonce = m_nonce + threadNumber;
+        uint32_t localNonce = m_nonce;
 
         Job job = m_currentJob;
 
@@ -98,7 +99,7 @@ void CPU::hash(const uint32_t threadNumber)
 
         if (job.algorithm != currentAlgorithm)
         {
-            m_hardwareConfig.initNonceOffsets(algorithm->getMemory());
+            nonceInfo = m_hardwareConfig->getNonceOffsetInfo("cpu");
             currentAlgorithm = job.algorithm;
         }
 
@@ -106,8 +107,12 @@ void CPU::hash(const uint32_t threadNumber)
         algorithm->init(m_currentJob.rawBlob);
         algorithm->reinit(m_currentJob.rawBlob);
 
+        int i = 0;
+
         while (!m_newJobAvailable[threadNumber])
         {
+            const uint32_t ourNonce = localNonce + (i * nonceInfo.noncesPerRound) + threadNumber;
+
             /* If nicehash mode is enabled, we are only allowed to alter 3 bytes
                in the nonce, instead of four. The first byte is reserved for nicehash
                to do with as they like.
@@ -121,18 +126,25 @@ void CPU::hash(const uint32_t threadNumber)
                reserved. */
             if (isNiceHash)
             {
-                *job.nonce() = (localNonce & 0x00FFFFFF) | (*job.nonce() & 0xFF000000);
+                *job.nonce() = (ourNonce & 0x00FFFFFF) | (*job.nonce() & 0xFF000000);
             }
             else
             {
-                *job.nonce() = localNonce;
+                *job.nonce() = ourNonce;
             }
 
             const auto hash = algorithm->hash(job.rawBlob);
 
             m_submitHash({ hash.data(), job.jobID, *job.nonce(), job.target, "CPU" });
 
-            localNonce += m_hardwareConfig.noncesPerRound;
+            i++;
+
+            /* If not all hardware has checked in with the new job, keep attempting
+             * to fetch it to ensure we're not doing duplicate work. */
+            if (!nonceInfo.allHardwareInitialized)
+            {
+                nonceInfo = m_hardwareConfig->getNonceOffsetInfo("cpu");
+            }
         }
 
         /* Switch to new job. */

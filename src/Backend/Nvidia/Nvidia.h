@@ -5,6 +5,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 
 #include "Backend/IBackend.h"
 #include "Types/JobSubmit.h"
@@ -13,7 +14,7 @@ class Nvidia : virtual public IBackend
 {
   public:
     Nvidia(
-        const HardwareConfig &hardwareConfig,
+        const std::shared_ptr<HardwareConfig> &hardwareConfig,
         const std::function<void(const JobSubmit &jobSubmit)> &submitValidHashCallback,
         const std::function<void(
             const uint32_t hashesPerformed,
@@ -29,7 +30,7 @@ class Nvidia : virtual public IBackend
 
   private:
 
-    void hash(const NvidiaDevice gpu, const uint32_t threadNumber);
+    void hash(NvidiaDevice &gpu, const uint32_t threadNumber);
 
     /* Current job to be working on */
     Job m_currentJob;
@@ -41,7 +42,7 @@ class Nvidia : virtual public IBackend
     std::atomic<bool> m_shouldStop = false;
 
     /* Threads to launch, whether CPU/GPU is enabled, etc */
-    HardwareConfig m_hardwareConfig;
+    std::shared_ptr<HardwareConfig> m_hardwareConfig;
 
     /* Worker threads */
     std::vector<std::thread> m_threads;
@@ -56,9 +57,6 @@ class Nvidia : virtual public IBackend
     const std::function<void(
         const uint32_t hashesPerformed,
         const std::string &deviceName)> m_incrementHashesPerformed;
-
-    /* Enabled nvidia devices grabbed from the config */
-    std::vector<NvidiaDevice> m_availableDevices;
 
     size_t m_numAvailableGPUs;
 };

@@ -225,7 +225,7 @@ void to_json(nlohmann::json &j, const MinerConfig &config)
 {
     j = {
         {"pools", config.pools},
-        {"hardwareConfiguration", config.hardwareConfiguration}
+        {"hardwareConfiguration", *(config.hardwareConfiguration)}
     };
 }
 
@@ -235,12 +235,12 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
 
     if (j.find("hardwareConfiguration") != j.end())
     {
-        config.hardwareConfiguration = j.at("hardwareConfiguration").get<HardwareConfig>();
+        *config.hardwareConfiguration = j.at("hardwareConfiguration").get<HardwareConfig>();
     }
     else
     {
-        config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
-        config.hardwareConfiguration.amd.devices = getAmdDevices();
+        config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+        config.hardwareConfiguration->amd.devices = getAmdDevices();
     }
 }
 
@@ -471,10 +471,10 @@ MinerConfig getConfigInteractively()
     MinerConfig config;
 
     config.pools = getPools();
-    config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
-    config.hardwareConfiguration.amd.devices = getAmdDevices();
-    config.hardwareConfiguration.cpu.enabled = true;
-    config.hardwareConfiguration.cpu.optimizationMethod = Constants::AUTO;
+    config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+    config.hardwareConfiguration->amd.devices = getAmdDevices();
+    config.hardwareConfiguration->cpu.enabled = true;
+    config.hardwareConfiguration->cpu.optimizationMethod = Constants::AUTO;
     config.interactive = true;
 
     writeConfigToDisk(config);
@@ -582,8 +582,8 @@ MinerConfig getMinerConfig(int argc, char **argv)
          cxxopts::value<std::string>(poolConfig.algorithm), "<algorithm>")
 
         ("threads", "The number of mining threads to use",
-         cxxopts::value<uint32_t>(config.hardwareConfiguration.cpu.threadCount)->default_value(
-            std::to_string(config.hardwareConfiguration.cpu.threadCount)), "<threads>")
+         cxxopts::value<uint32_t>(config.hardwareConfiguration->cpu.threadCount)->default_value(
+            std::to_string(config.hardwareConfiguration->cpu.threadCount)), "<threads>")
 
         ("disableCPU", "Disable CPU mining",
          cxxopts::value<bool>(disableCPU)->implicit_value("true"))
@@ -678,19 +678,19 @@ MinerConfig getMinerConfig(int argc, char **argv)
             }
 
             config.pools.push_back(poolConfig);
-            config.hardwareConfiguration.nvidia.devices = getNvidiaDevices();
-            config.hardwareConfiguration.amd.devices = getAmdDevices();
-            config.hardwareConfiguration.cpu.enabled = true;
-            config.hardwareConfiguration.cpu.optimizationMethod = Constants::AUTO;
+            config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+            config.hardwareConfiguration->amd.devices = getAmdDevices();
+            config.hardwareConfiguration->cpu.enabled = true;
+            config.hardwareConfiguration->cpu.optimizationMethod = Constants::AUTO;
 
             if (disableCPU)
             {
-                config.hardwareConfiguration.cpu.enabled = false;
+                config.hardwareConfiguration->cpu.enabled = false;
             }
 
             if (disableNVIDIA)
             {
-                for (auto &device : config.hardwareConfiguration.nvidia.devices)
+                for (auto &device : config.hardwareConfiguration->nvidia.devices)
                 {
                     device.enabled = false;
                 }
@@ -698,7 +698,7 @@ MinerConfig getMinerConfig(int argc, char **argv)
 
             if (disableAMD)
             {
-                for (auto &device : config.hardwareConfiguration.amd.devices)
+                for (auto &device : config.hardwareConfiguration->amd.devices)
                 {
                     device.enabled = false;
                 }

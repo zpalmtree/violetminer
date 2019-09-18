@@ -16,22 +16,24 @@
 
 struct NvidiaDevice
 {
+    /* Is this device enabled for mining. */
     bool enabled = true;
 
+    /* The name of this device to display to the user. */
     std::string name;
 
+    /* The internal ID of this device. In Nvidia, these are zero indexed offsets.
+     * The first GPU is 0, second is 1, etc. */
     uint16_t id;
 
-    uint32_t nonceOffset;
+    /* Has this device checked in since we last received a job. If not, it
+     * may be inaccurate. */
+    bool checkedIn = false;
 
-    uint32_t getNoncesPerRound(const size_t scratchpadSize)
-    {
-        #if defined(NVIDIA_ENABLED)
-        return getNoncesPerRun(scratchpadSize, id);
-        #else
-        return 0;
-        #endif
-    }
+    /* How many nonces per hashing round does this device calculate. This is
+     * used to calculate how much each device should increment and offset
+     * it's nonces. */
+    uint32_t noncesPerRound = 0;
 };
 
 struct AmdDevice
@@ -42,12 +44,9 @@ struct AmdDevice
 
     uint16_t id;
 
-    uint32_t nonceOffset;
+    bool checkedIn = true;
 
-    uint32_t getNoncesPerRound(const size_t scratchpadSize)
-    {
-        return 0;
-    }
+    uint32_t noncesPerRound = 0;
 };
 
 struct CpuConfig
@@ -69,6 +68,15 @@ struct AmdConfig
     std::vector<AmdDevice> devices;
 };
 
+struct NonceInfo
+{
+    uint32_t noncesPerRound = 0;
+
+    uint32_t nonceOffset = 0;
+
+    bool allHardwareInitialized = true;
+};
+
 struct HardwareConfig
 {
     CpuConfig cpu;
@@ -77,21 +85,54 @@ struct HardwareConfig
 
     uint32_t noncesPerRound;
 
-    void initNonceOffsets(const size_t scratchpadSize)
+    NonceInfo getNonceOffsetInfo(const std::string device, const uint32_t gpuIndex = 0)
     {
-        uint32_t tmpNoncesPerRound = 0;
+        NonceInfo nonceInfo;
+
+        bool foundOurDevice = false;
 
         if (cpu.enabled)
         {
-            tmpNoncesPerRound += cpu.threadCount;
+            /* CPU will process one nonce per round, per thread */
+            nonceInfo.noncesPerRound += cpu.threadCount;
+
+            /* CPU will start processing nonces with no offset. */
+            if (device != "cpu")
+            {
+                nonceInfo.nonceOffset += cpu.threadCount;
+            }
+            else
+            {
+                foundOurDevice = true;
+            }
         }
 
         for (auto &gpu : nvidia.devices)
         {
             if (gpu.enabled)
             {
-                gpu.nonceOffset = noncesPerRound;
-                tmpNoncesPerRound += gpu.getNoncesPerRound(scratchpadSize);
+                nonceInfo.noncesPerRound += gpu.noncesPerRound;
+
+                /* Each GPU will need to check in with it's new nonce per
+                 * round calculation. Otherwise, offsets may be incorrect
+                 * for example if scratchpad size changed. Therefore, if
+                 * all hardware has not been initialized, we'll keep
+                 * fetching new offsets. */
+                if (!gpu.checkedIn)
+                {
+                    nonceInfo.allHardwareInitialized = false;
+                }
+
+                /* No more changes to nonce offset, found our device */
+                if (device == "nvidia" && gpuIndex == gpu.id)
+                {
+                    foundOurDevice = true;
+                }
+                /* If we haven't found our device yet, keep incrementing nonce offset */
+                else if (!foundOurDevice)
+                {
+                    nonceInfo.nonceOffset += gpu.noncesPerRound;
+                }
             }
         }
 
@@ -99,12 +140,27 @@ struct HardwareConfig
         {
             if (gpu.enabled)
             {
-                gpu.nonceOffset = noncesPerRound;
-                tmpNoncesPerRound += gpu.getNoncesPerRound(scratchpadSize);
+                nonceInfo.noncesPerRound += gpu.noncesPerRound;
+
+                if (!gpu.checkedIn)
+                {
+                    nonceInfo.allHardwareInitialized = false;
+                }
+
+                /* No more changes to nonce offset, found our device */
+                if (device == "amd" && gpuIndex == gpu.id)
+                {
+                    foundOurDevice = true;
+                }
+                /* If we haven't found our device yet, keep incrementing nonce offset */
+                else if (!foundOurDevice)
+                {
+                    nonceInfo.nonceOffset += gpu.noncesPerRound;
+                }
             }
         }
 
-        noncesPerRound = tmpNoncesPerRound;
+        return nonceInfo;
     }
 };
 
@@ -116,7 +172,7 @@ struct MinerConfig
 
     bool interactive = false;
 
-    HardwareConfig hardwareConfiguration;
+    std::shared_ptr<HardwareConfig> hardwareConfiguration = std::make_shared<HardwareConfig>();
 };
 
 void to_json(nlohmann::json &j, const MinerConfig &config);
