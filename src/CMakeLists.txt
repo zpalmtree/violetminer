@@ -1,6 +1,10 @@
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Argon2/src")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
+if (ENABLE_NVIDIA)
+    include_directories("${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}")
+endif()
+
 # Add the ArgonVariants directory to add that library
 add_subdirectory(ArgonVariants)
 
