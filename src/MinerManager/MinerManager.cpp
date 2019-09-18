@@ -152,7 +152,7 @@ void MinerManager::start()
 
 void MinerManager::resumeMining()
 {
-    if (!m_threads.empty())
+    if (!m_threads.empty() || m_statsThread.joinable())
     {
         pauseMining();
     }
