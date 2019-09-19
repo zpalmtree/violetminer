@@ -184,6 +184,11 @@ void MinerManager::pauseMining()
 
     m_shouldStop = true;
 
+    for (auto &backend : m_enabledBackends)
+    {
+        backend->stop();
+    }
+
     /* Pause the hashrate calculator */
     m_hashManager.pause();
 
@@ -196,6 +201,11 @@ void MinerManager::pauseMining()
 void MinerManager::stop()
 {
     m_shouldStop = true;
+
+    for (auto &backend : m_enabledBackends)
+    {
+        backend->stop();
+    }
 
     /* Pause the hashrate calculator */
     m_hashManager.pause();
