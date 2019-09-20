@@ -1,0 +1,114 @@
+version: '{build}'
+
+build:
+  verbosity: detailed
+
+configuration:
+  - Release
+
+environment:
+  matrix:
+    ###########################################################################
+    # Build x86 version using MSVC 2019
+    ###########################################################################
+    #- APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    #  MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
+    #  MSVC_SETUP_ARG: x86
+    #  TAG: win32
+    #  CUDA_VER: 10.1
+    #  CUDA_ARCHIVE: cuda_10.1.168_425.25_win10.exe
+
+    ###########################################################################
+    # Build x64 version using MSVC 2017
+    ###########################################################################
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
+      MSVC_SETUP_ARG: x64
+      TAG: win64
+      CUDA_VER: 10.1
+      CUDA_ARCHIVE: cuda_10.1.243_426.00_win10.exe
+
+    ###########################################################################
+    # Build 64 bit version using clang-cl backed by MSVC 2019
+    # -------------------------------------------------------------------------
+    # Note that building against MSVC 2019 is only supported with a newer clang
+    ###########################################################################
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
+      MSVC_SETUP_ARG: x64
+      USE_CLANG: ON
+      INSTALL_NEW_CLANG: ON
+      CLANG_URL: https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/LLVM-8.0.1-win64.exe
+      TAG: win64
+      CUDA_VER: 10.1
+      CUDA_ARCHIVE: cuda_10.1.243_426.00_win10.exe
+
+install:
+  - mkdir C:\projects\deps
+  - cd C:\projects\deps
+
+  # Setup A newer CMake
+  #- set CMAKE_URL=https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-win64-x64.zip
+  #- appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
+  #- 7z x cmake.zip -oC:\projects\deps > nul
+  #- move C:\projects\deps\cmake-* C:\projects\deps\cmake
+  #- set PATH=C:\projects\deps\cmake\bin;%PATH%
+  #- cmake --version
+
+  # Upgrade clang if necessary
+  - IF DEFINED INSTALL_NEW_CLANG appveyor DownloadFile %CLANG_URL% -FileName llvm-installer.exe
+  - IF DEFINED INSTALL_NEW_CLANG START /WAIT llvm-installer.exe /S /D=C:\"Program Files\LLVM"
+
+  # Install CUDA
+  - appveyor DownloadFile https://developer.download.nvidia.com/compute/cuda/%CUDA_VER%/Prod/local_installers/%CUDA_ARCHIVE% -FileName %CUDA_ARCHIVE%
+  - ps: Start-Process -FilePath "C:\projects\deps\$env:CUDA_ARCHIVE" -ArgumentList "-s nvcc_%CUDA_VER%" -Wait -NoNewWindow
+  - 7z x %CUDA_ARCHIVE%
+  - copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations"
+  - set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%\bin\";%PATH%
+  - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%\bin\nvcc"
+
+before_build:
+  #############################################################################
+  # Setup MSVC Environment
+  #############################################################################
+  - call "%MSVC_SETUP_PATH%" %MSVC_SETUP_ARG%
+
+build_script:
+  # Weird cuda errors without this - https://help.appveyor.com/discussions/problems/5814-issue-with-msbuild-custom-build-rule
+  - ps: sleep 5
+  - ps: restart-computer -f
+  - ps: sleep 5
+  - IF DEFINED USE_CLANG set PATH="C:\Program Files\LLVM\bin";%PATH%
+  - IF DEFINED USE_CLANG set CMAKE_EXTRA_OPTIONS=-DCMAKE_C_COMPILER=clang.exe -DCMAKE_CXX_COMPILER=clang.exe
+  - cd C:\projects\violetminer
+  - git submodule update --init --recursive
+  - md build
+  - cd build
+  - cmake -G "Visual Studio 16 2019"
+          -A x64
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1
+          -DCUDA_TOOLKIT_ROOT_DIR="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%" .. 
+          %CMAKE_EXTRA_OPTIONS%
+        || cat CMakeFiles/CMakeError.log || cat CMakeFiles/CMakeOutput.log
+  - MSBuild violetminer.sln /p:Configuration=Release /m
+  - mkdir violetminer-%TAG%
+  - copy violetminer.exe violetminer-%TAG%
+  - 7z a violetminer-%TAG%.zip violetminer-%TAG%
+  - copy violetminer-%TAG%.zip ..
+
+artifacts:
+  - path: violetminer-%TAG%.zip
+    name: violetminer-artifact
+
+deploy:
+  - provider: GitHub
+    description: ''
+    auth_token:
+        secure: Ho2ZwjJ/dgK4U/dSfkDvhvNhmCZnrAbP/5ZpHfIzCNqpXL9ieY8z1xZtxv37SsfM
+    artifact: violetminer-artifact
+    draft: false
+    prerelease: false
+    on:
+        branch: master
+        APPVEYOR_REPO_TAG: true
