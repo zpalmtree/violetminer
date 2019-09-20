@@ -214,7 +214,12 @@ inline void from_json(const nlohmann::json &j, LoginMessage &l)
     const auto result = j.at("result");
 
     l.loginID = result.at("id").get<std::string>();
-    l.status = result.at("status").get<std::string>();
+
+    if (result.find("status") != result.end())
+    {
+        l.status = result.at("status").get<std::string>();
+    }
+
     l.job = result.at("job").get<Job>();
 }
 
