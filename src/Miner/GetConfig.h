@@ -34,6 +34,9 @@ struct NvidiaDevice
      * used to calculate how much each device should increment and offset
      * it's nonces. */
     uint32_t noncesPerRound = 0;
+
+    /* Multiplier to decide how much memory / threads to launch. 0-100. */
+    float intensity = 100.0;
 };
 
 struct AmdDevice
@@ -47,6 +50,8 @@ struct AmdDevice
     bool checkedIn = true;
 
     uint32_t noncesPerRound = 0;
+
+    float intensity = 100.0;
 };
 
 struct CpuConfig

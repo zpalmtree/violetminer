@@ -147,7 +147,8 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
             state = initializeState(
                 gpu.id,
                 algorithm->getMemory(),
-                algorithm->getIterations()
+                algorithm->getIterations(),
+                gpu.intensity
             );
 
             currentAlgorithm = job.algorithm;
