@@ -87,15 +87,16 @@ build_script:
   - cmake -G "Visual Studio 16 2019"
           -A x64
           -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1
-          -DCUDA_TOOLKIT_ROOT_DIR="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%" .. 
+          -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 .. 
           %CMAKE_EXTRA_OPTIONS%
         || cat CMakeFiles/CMakeError.log || cat CMakeFiles/CMakeOutput.log
   - MSBuild violetminer.sln /p:Configuration=Release /m
+  - cd Release
   - mkdir violetminer-%TAG%
+  - ls
   - copy violetminer.exe violetminer-%TAG%
   - 7z a violetminer-%TAG%.zip violetminer-%TAG%
-  - copy violetminer-%TAG%.zip ..
+  - copy violetminer-%TAG%.zip ../..
 
 artifacts:
   - path: violetminer-%TAG%.zip
