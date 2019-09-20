@@ -101,7 +101,8 @@ void to_json(nlohmann::json &j, const NvidiaDevice &device)
         {"enabled", device.enabled},
         {"name", device.name},
         {"id", device.id},
-        {"intensity", device.intensity}
+        {"intensity", device.intensity},
+        {"desktopLag", device.desktopLag}
     };
 }
 
@@ -123,6 +124,11 @@ void from_json(const nlohmann::json &j, NvidiaDevice &device)
     {
         device.intensity = j.at("intensity").get<float>();
     }
+
+    if (j.find("desktopLag") != j.end())
+    {
+        device.desktopLag = j.at("desktopLag").get<float>();
+    }
 }
 
 void to_json(nlohmann::json &j, const AmdDevice &device)
@@ -131,7 +137,8 @@ void to_json(nlohmann::json &j, const AmdDevice &device)
         {"enabled", device.enabled},
         {"name", device.name},
         {"id", device.id},
-        {"intensity", device.intensity}
+        {"intensity", device.intensity},
+        {"desktopLag", device.desktopLag}
     };
 }
 

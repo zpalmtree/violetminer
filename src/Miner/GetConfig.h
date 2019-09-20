@@ -37,6 +37,10 @@ struct NvidiaDevice
 
     /* Multiplier to decide how much memory / threads to launch. 0-100. */
     float intensity = 100.0;
+
+    /* Determines how much we sleep between kernel launches. Helps the desktop
+     * not be such a laggy POS while mining. */
+    float desktopLag = 100.0;
 };
 
 struct AmdDevice
@@ -52,6 +56,8 @@ struct AmdDevice
     uint32_t noncesPerRound = 0;
 
     float intensity = 100.0;
+
+    float desktopLag = 100.0;
 };
 
 struct CpuConfig

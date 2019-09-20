@@ -133,6 +133,17 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
 
     NonceInfo nonceInfo;
 
+    const float modifier = 0.000001;
+
+    /* woooo magical shitty formula */
+    const uint32_t gpuLag = 45 * (pow(2, ((100 - gpu.desktopLag) * 0.2)) - 1);
+
+    const double seconds = gpuLag / 1000000.0;
+
+    std::cout << "GPU " << gpu.id << "| Intensity: " << gpu.intensity << ", Desktop Lag: " << gpu.desktopLag << std::endl
+              << "GPU " << gpu.id << "| Sleeping for " << seconds << " seconds between kernel launches"
+              << " (" << gpuLag << " microseconds)" << std::endl;
+
     while (!m_shouldStop)
     {
         Job job = m_currentJob;
@@ -189,6 +200,8 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
                 {
                     m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target, gpuName });
                 }
+
+                std::this_thread::sleep_for(std::chrono::microseconds(gpuLag));
             }
             catch (const std::exception &e)
             {
