@@ -93,10 +93,10 @@ build_script:
   - MSBuild violetminer.sln /p:Configuration=Release /m
   - cd Release
   - mkdir violetminer-%TAG%
-  - ls
   - copy violetminer.exe violetminer-%TAG%
+  - copy C:\projects\README.md violetminer-%TAG%
   - 7z a violetminer-%TAG%.zip violetminer-%TAG%
-  - copy violetminer-%TAG%.zip ../..
+  - copy violetminer-%TAG%.zip C:\projects\violetminer
 
 artifacts:
   - path: violetminer-%TAG%.zip
