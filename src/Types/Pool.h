@@ -48,9 +48,26 @@ struct Pool
     /* The priority of this pool in the list of pools */
     size_t priority = 0;
 
-    inline std::string getAgent() const
+    std::string getAgent() const
     {
         return agent == "" ? "violetminer-" + Constants::VERSION : agent;
+    }
+
+    bool operator==(const Pool& other) const
+    {
+        return host         == other.host
+            && port         == other.port
+            && username     == other.username
+            && password     == other.password
+            && rigID        == other.rigID
+            && algorithm    == other.algorithm
+            && agent        == other.agent
+            && loginID      == other.loginID;
+    }
+
+    bool operator!=(const Pool& other) const
+    {
+        return !operator==(other);
     }
 };
 

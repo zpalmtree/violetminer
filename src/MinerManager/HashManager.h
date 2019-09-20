@@ -42,6 +42,9 @@ class HashManager
 
     /* Start hashrate monitoring */
     void start();
+
+    /* Reset accepted/submitted count, for example when changing pools */
+    void resetShareCount();
     
   private:
     /* Total number of hashes we have performed */

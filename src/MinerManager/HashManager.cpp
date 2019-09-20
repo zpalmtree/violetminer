@@ -166,3 +166,9 @@ void HashManager::pause()
     m_paused = true;
     m_pauseTime = std::chrono::high_resolution_clock::now();
 }
+
+void HashManager::resetShareCount()
+{
+    m_submittedHashes = 0;
+    m_acceptedHashes = 0;
+}

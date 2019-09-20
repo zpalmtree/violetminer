@@ -45,7 +45,6 @@ class MinerManager
     void statPrinter();
 
     /* PRIVATE VARIABLES */
-    std::vector<std::thread> m_threads;
 
     /* Should we stop the worker funcs */
     std::atomic<bool> m_shouldStop = false;
@@ -71,5 +70,9 @@ class MinerManager
 
     const std::shared_ptr<HardwareConfig> m_hardwareConfig;
 
+    /* Current algorithm we're mining with */
     std::string m_currentAlgorithm;
+
+    /* Current pool we're hashing on */
+    Pool m_currentPool;
 };

@@ -119,7 +119,7 @@ void MinerManager::setNewJob(const Job &job)
 
 void MinerManager::start()
 {
-    if (!m_threads.empty() || m_statsThread.joinable())
+    if (m_statsThread.joinable())
     {
         stop();
     }
@@ -138,6 +138,14 @@ void MinerManager::start()
 
     /* Start mining when we connect to a pool */
     m_pool->onPoolSwapped([this](const Pool &newPool){
+
+        /* New pool, accepted/submitted count no longer applies */
+        if (newPool != m_currentPool) {
+            m_hashManager.resetShareCount();
+        }
+
+        m_currentPool = newPool;
+
         resumeMining();
     });
 
@@ -152,7 +160,7 @@ void MinerManager::start()
 
 void MinerManager::resumeMining()
 {
-    if (!m_threads.empty() || m_statsThread.joinable())
+    if (m_statsThread.joinable())
     {
         pauseMining();
     }
