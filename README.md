@@ -113,7 +113,8 @@ For example:
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         }
     ]
-}```
+}
+```
 
 ### Disabling CPU/GPU/Specific Cards
 
