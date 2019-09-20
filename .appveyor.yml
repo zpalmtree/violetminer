@@ -94,7 +94,7 @@ build_script:
   - cd Release
   - mkdir violetminer-%TAG%
   - copy violetminer.exe violetminer-%TAG%
-  - copy C:\projects\README.md violetminer-%TAG%
+  - copy C:\projects\violetminer\README.md violetminer-%TAG%
   - 7z a violetminer-%TAG%.zip violetminer-%TAG%
   - copy violetminer-%TAG%.zip C:\projects\violetminer
 
