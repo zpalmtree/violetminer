@@ -51,15 +51,17 @@ For example:
 {
     "hardwareConfiguration": {
         "cpu": {
-            "enabled": true,
+            "enabled": false,
             "optimizationMethod": "Auto",
             "threadCount": 12
         },
         "nvidia": {
             "devices": [
                 {
+                    "desktopLag": 95.0,
                     "enabled": true,
                     "id": 0,
+                    "intensity": 100.0,
                     "name": "GeForce GTX 1070"
                 }
             ]
@@ -68,29 +70,50 @@ For example:
     "pools": [
         {
             "agent": "",
+            "algorithm": "wrkz",
+            "host": "fastpool.xyz",
+            "niceHash": false,
+            "password": "x",
+            "port": 3005,
+            "priority": 1,
+            "rigID": "",
+            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
+        },
+        {
+            "agent": "",
             "algorithm": "turtlecoin",
             "host": "trtl.pool.mine2gether.com",
             "niceHash": false,
             "password": "x",
-            "port": 3335,
-            "priority": 0,
+            "port": 2225,
+            "priority": 3,
             "rigID": "",
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
-            "agent": "violetminer-v0.0.3",
-            "algorithm": "wrkzcoin",
-            "host": "publicnode.ydns.eu",
-            "niceHash": false,
+            "agent": "",
+            "algorithm": "turtlecoin",
+            "host": "donate.futuregadget.xyz",
+            "niceHash": true,
             "password": "x",
-            "port": 3420,
-            "rigID": "rig1",
-            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7",
-            "priority": 1
+            "port": 3333,
+            "priority": 4,
+            "rigID": "",
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
+        },
+        {
+            "agent": "",
+            "algorithm": "turtlecoin",
+            "host": "127.0.0.1",
+            "niceHash": true,
+            "password": "x",
+            "port": 5555,
+            "priority": 0,
+            "rigID": "",
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         }
     ]
-}
-```
+}```
 
 ### Disabling CPU/GPU/Specific Cards
 
@@ -104,7 +127,27 @@ It's highly recommended that you don't change the `name` or `id` fields, or you 
 
 You can always delete your config file, and let the program regenerate it, if you mess up.
 
-### Optimization method
+### GPU Configuration
+
+#### Intensity
+
+* In addition to enabling and disabling specific cards, you can also configure how many threads and how much memory they use.
+* This is done by altering the `intensity` value in the config.
+* A value of `100` for intensity means the maximum threads and memory will be used.
+* A value of `0` for intensity means no threads and memory will be used.
+* Lower intensities don't neccessarily mean lower hashrate.
+
+#### Desktop Lag
+
+* The `desktopLag` value determines how long we will sleep between kernel launches.
+* The default value of `100` means there are no sleeps between launches.
+* This is appropriate for most setups, where you are just mining.
+* However, if you are mining on your personal PC, and your desktop is quite laggy while mining, you can use this setting to decrease the lags.
+* A value of 100 means maximum desktop lag, a value of 0 means minimum desktop lag.
+* You can see how long we will sleep between launches printed at startup.
+* A lower value of desktop lag means less hashrate, because we launch the hasher kernel less.
+
+### CPU Optimization method
 
 By default, the program will automatically choose the optimization method to use.
 
