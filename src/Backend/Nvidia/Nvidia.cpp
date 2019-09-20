@@ -192,6 +192,8 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
             catch (const std::exception &e)
             {
                 std::cout << WarningMsg("Caught unexpected error from GPU hasher: " + std::string(e.what())) << std::endl;
+                std::cout << WarningMsg("Stopping mining on " + gpuName) << std::endl;
+                return;
             }
 
             i++;
