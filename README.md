@@ -51,17 +51,17 @@ For example:
 {
     "hardwareConfiguration": {
         "cpu": {
-            "enabled": false,
+            "enabled": true,
             "optimizationMethod": "Auto",
             "threadCount": 12
         },
         "nvidia": {
             "devices": [
                 {
-                    "desktopLag": 95.0,
+                    "desktopLag": 100.0,
                     "enabled": true,
                     "id": 0,
-                    "intensity": 100.0,
+                    "intensity": 50.0,
                     "name": "GeForce GTX 1070"
                 }
             ]
@@ -70,23 +70,12 @@ For example:
     "pools": [
         {
             "agent": "",
-            "algorithm": "wrkz",
-            "host": "fastpool.xyz",
-            "niceHash": false,
-            "password": "x",
-            "port": 3005,
-            "priority": 1,
-            "rigID": "",
-            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
-        },
-        {
-            "agent": "",
             "algorithm": "turtlecoin",
             "host": "trtl.pool.mine2gether.com",
             "niceHash": false,
             "password": "x",
             "port": 2225,
-            "priority": 3,
+            "priority": 0,
             "rigID": "",
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
@@ -97,20 +86,20 @@ For example:
             "niceHash": true,
             "password": "x",
             "port": 3333,
-            "priority": 4,
+            "priority": 2,
             "rigID": "",
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
             "agent": "",
-            "algorithm": "turtlecoin",
-            "host": "127.0.0.1",
-            "niceHash": true,
+            "algorithm": "wrkz",
+            "host": "fastpool.xyz",
+            "niceHash": false,
             "password": "x",
-            "port": 5555,
-            "priority": 0,
+            "port": 3005,
+            "priority": 1,
             "rigID": "",
-            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
+            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
         }
     ]
 }
