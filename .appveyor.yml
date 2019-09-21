@@ -50,7 +50,12 @@ install:
   # Upgrade clang if necessary
   - IF DEFINED INSTALL_NEW_CLANG appveyor DownloadFile %CLANG_URL% -FileName llvm-installer.exe
   - IF DEFINED INSTALL_NEW_CLANG START /WAIT llvm-installer.exe /S /D=C:\"Program Files\LLVM"
-  - IF DEFINED INSTALL_NEW_CLANG clang --version
+
+  - IF DEFINED USE_CLANG clang --version
+  - IF DEFINED USE_CLANG git clone https://github.com/zpalmtree/llvm-vs2017-integration.git
+  - IF DEFINED USE_CLANG cd llvm-vs2017-integration
+  - IF DEFINED USE_CLANG AutoSetup
+  - IF DEFINED USE_CLANG cd ..
 
   # Install CUDA
   - appveyor DownloadFile https://developer.download.nvidia.com/compute/cuda/%CUDA_VER%/Prod/local_installers/%CUDA_ARCHIVE% -FileName %CUDA_ARCHIVE%
