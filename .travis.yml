@@ -79,16 +79,15 @@ matrix:
     - CUDA_VER=10.1
     - CUDA_ARCHIVE="cuda_10.1.243_426.00_win10.exe"
     script:
-    - wget https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE -FileName $CUDA_ARCHIVE
-    - ps: Start-Process -FilePath "C:\projects\deps\$env:CUDA_ARCHIVE" -ArgumentList "-s nvcc_%CUDA_VER%" -Wait -NoNewWindow
-    - 7z x %CUDA_ARCHIVE%
-    - copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations"
-    - set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%\bin\";%PATH%
-    - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v%CUDA_VER%\bin\nvcc"
+    - wget https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
+    - ps: Start-Process -FilePath "$CUDA_ARCHIVE" -ArgumentList "-s nvcc_$CUDA_VER" -Wait -NoNewWindow
+    - 7z x $CUDA_ARCHIVE
+    - copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v150\BuildCustomizations"
+    - set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\";$PATH
+    - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\nvcc"
     - mkdir build && cd build
     - export PATH=$MSBUILD_PATH:$PATH
-    - cmake -G "Visual Studio 16 2019"
-            -A x64
+    - cmake -G "Visual Studio 15 2017 Win64"
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1
     - MSBuild violetminer.sln /p:Configuration=Release /m
