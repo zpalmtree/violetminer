@@ -176,17 +176,15 @@ Note: On ARMv8, `Auto` uses no optimizations. From my testing, the NEON implemen
 
 ## Compiling
 
+#### Disabling NVIDIA support
+
+Run cmake with the -DNVIDIA=OFF flag: `cmake -DNVIDIA=OFF ..`
+
 ### Windows
 
+- Download and install CUDA from here: https://developer.nvidia.com/cuda-downloads (This step is only if you want Nvidia support.)
 - Download the [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16) Installer.
 - When it opens up select **C++ build tools**, it automatically selects the needed parts.
-<!---
-- Install the latest full version of OpenSSL if you want to compile with SSL support. (currently OpenSSL 1.1.1c). Select the appropriate version for your system:
-  - [OpenSSL 64-bit](https://slproweb.com/download/Win64OpenSSL-1_1_1c.exe)
-  - [OpenSSL 32-bit](https://slproweb.com/download/Win32OpenSSL-1_1_1c.exe)
-  -->
-
-For 64-bit:
 - From the start menu, open 'x64 Native Tools Command Prompt for VS 2019'.
 - `cd C:/` (Or your directory of choice)
 - `git clone https://github.com/turtlecoin/violetminer`
@@ -197,27 +195,12 @@ For 64-bit:
 - `cmake -G "Visual Studio 16 2019" -A x64 ..`
 - `MSBuild violetminer.sln /p:Configuration=Release /m`
 
-For 32-bit:
-- From the start menu, open 'x86 Native Tools Command Prompt for VS 2019'.
-- `git clone https://github.com/turtlecoin/violetminer`
-- `cd violetminer`
-- `git submodule update --init --recursive`
-- `mkdir build`
-- `cd build`
-- `cmake -G "Visual Studio 16 2019" -A Win32 ..`
-- `MSBuild violetminer.sln /p:Configuration=Release /p:Platform=Win32 /m` 
-
 ### Linux
 
-**If you are on x86-64 (If you're not sure, you almost certainly are) It's highly recommended to use Clang to compile. It gets better hashrate for many people.**
-
-For example, I get 7300h/s with GCC, and 10500h/s with Clang on a Ryzen 1600.
-
-If you're on ARM however, GCC gets slightly better hashrate.
-
-#### Disabling NVIDIA support
-
-Run cmake like so: `cmake -DNVIDIA=OFF ..`
+* It's recommended to use Clang to compile. It gets better CPU hashrate for many people.
+* If you're on ARM however, GCC gets slightly better hashrate.
+* You will need to install CUDA if you want Nvidia support, which is somewhat out of the scope of this document. 
+* You can find the CUDA binaries for linux here: https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64
 
 #### Ubuntu, using Clang
 
