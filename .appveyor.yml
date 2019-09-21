@@ -50,16 +50,16 @@ install:
   - IF DEFINED INSTALL_NEW_CLANG START /WAIT llvm-installer.exe /S /D=C:\"Program Files\LLVM"
 
   - IF DEFINED USE_CLANG clang --version
-  - IF DEFINED USE_CLANG git clone https://github.com/zpalmtree/llvm-vs2017-integration.git
-  - IF DEFINED USE_CLANG cd llvm-vs2017-integration
-  - IF DEFINED USE_CLANG 
-  - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017")
-  - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp")
-  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.props"
-  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.targets"
-  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.props"
-  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.targets"
-  - IF DEFINED USE_CLANG cd ..
+  # - IF DEFINED USE_CLANG git clone https://github.com/zpalmtree/llvm-vs2017-integration.git
+  # - IF DEFINED USE_CLANG cd llvm-vs2017-integration
+  # - IF DEFINED USE_CLANG 
+  # - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017")
+  # - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp")
+  # - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.props"
+  # - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.targets"
+  # - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.props"
+  # - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.targets"
+  # - IF DEFINED USE_CLANG cd ..
 
   # Install CUDA
   - appveyor DownloadFile https://developer.download.nvidia.com/compute/cuda/%CUDA_VER%/Prod/local_installers/%CUDA_ARCHIVE% -FileName %CUDA_ARCHIVE%
