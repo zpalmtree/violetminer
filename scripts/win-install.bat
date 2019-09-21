@@ -9,7 +9,7 @@ md build
 
 cd build
 
-cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release .. || exit /b 1
+cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 .. || exit /b 1
 
 MSBuild violetminer.sln /p:Configuration=Release /m || exit /b 1 
 

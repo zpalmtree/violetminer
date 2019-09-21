@@ -139,7 +139,8 @@ matrix:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
-    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Tools"
+    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7"
+    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Tools\MSVC"
     - ./scripts/win-install.bat
     - cd Release
     - mkdir $RELEASE_FILENAME
