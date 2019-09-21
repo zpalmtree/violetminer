@@ -18,6 +18,10 @@
 #include "cpu_features/include/cpuinfo_x86.h"
 #endif
 
+#if defined(NVIDIA_ENABLED)
+#include "Backend/Nvidia/NvidiaUtils.h"
+#endif
+
 std::vector<Pool> getDevPools()
 {
     std::vector<Pool> pools;
@@ -28,7 +32,6 @@ std::vector<Pool> getDevPools()
     pool1.username = "donate";
     pool1.algorithm = "turtlecoin";
     pool1.niceHash = true;
-    pool1.algorithmGenerator = ArgonVariant::Algorithms[pool1.algorithm];
 
     pools.push_back(pool1);
 
@@ -38,7 +41,7 @@ std::vector<Pool> getDevPools()
 void printWelcomeHeader(MinerConfig config)
 {
     std::cout << InformationMsg("* ") << WhiteMsg("ABOUT", 25) << InformationMsg("violetminer " + Constants::VERSION) << std::endl
-              << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.threadCount) << std::endl
+              << InformationMsg("* ") << WhiteMsg("THREADS", 25) << InformationMsg(config.hardwareConfiguration->cpu.threadCount) << std::endl
               << InformationMsg("* ") << WhiteMsg("OPTIMIZATION SUPPORT", 25);
 
     std::vector<std::tuple<Constants::OptimizationMethod, bool>> availableOptimizations;
@@ -75,9 +78,9 @@ void printWelcomeHeader(MinerConfig config)
 
     std::cout << std::endl << InformationMsg("* ") << WhiteMsg("CHOSEN OPTIMIZATION", 25);
     
-    if (config.optimizationMethod == Constants::AUTO)
+    if (config.hardwareConfiguration->cpu.optimizationMethod == Constants::AUTO)
     {
-        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.optimizationMethod));
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod));
 
         const auto optimization = getAutoChosenOptimization();
 
@@ -90,14 +93,18 @@ void printWelcomeHeader(MinerConfig config)
             std::cout << SuccessMsg(" (" + Constants::optimizationMethodToString(optimization) + ")") << std::endl;
         }
     }
-    else if (config.optimizationMethod != Constants::NONE)
+    else if (config.hardwareConfiguration->cpu.optimizationMethod != Constants::NONE)
     {
-        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
+        std::cout << SuccessMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod)) << std::endl;
     }
     else
     {
-        std::cout << WarningMsg(Constants::optimizationMethodToString(config.optimizationMethod)) << std::endl;
+        std::cout << WarningMsg(Constants::optimizationMethodToString(config.hardwareConfiguration->cpu.optimizationMethod)) << std::endl;
     }
+
+#if defined(NVIDIA_ENABLED)
+    printNvidiaHeader();
+#endif
 
     std::cout << InformationMsg("* ") << WhiteMsg("COMMANDS", 25)
               << InformationMsg("h") << SuccessMsg("ashrate")
@@ -134,7 +141,7 @@ int main(int argc, char **argv)
     MinerConfig config = getMinerConfig(argc, argv);
 
     /* Set the global config */
-    Config::config.optimizationMethod = config.optimizationMethod;
+    Config::config.optimizationMethod = config.hardwareConfiguration->cpu.optimizationMethod;
 
     /* If not initial startup, print welcome header */
     if (!config.interactive)
@@ -150,8 +157,8 @@ int main(int argc, char **argv)
     const auto devPoolManager = std::make_shared<PoolCommunication>(devPools);
 
     /* Setup a manager for the user pools and the dev pools */
-    MinerManager userMinerManager(userPoolManager, config.threadCount);
-    MinerManager devMinerManager(devPoolManager, config.threadCount);
+    MinerManager userMinerManager(userPoolManager, config.hardwareConfiguration, false);
+    MinerManager devMinerManager(devPoolManager, config.hardwareConfiguration, true);
 
     /* A cycle lasts 100 minutes */
     const auto cycleLength = std::chrono::minutes(100);

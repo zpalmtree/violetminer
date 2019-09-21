@@ -60,6 +60,7 @@ add_executable(violetminer main.cpp GetConfig.cpp)
 target_link_libraries(violetminer
     ArgonVariants
     Argon2
+    Backend
     Blake2
     Config
     MinerManager

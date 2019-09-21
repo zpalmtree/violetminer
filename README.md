@@ -2,7 +2,7 @@
 
 ![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Argon_discharge_tube.jpg/500px-Argon_discharge_tube.jpg)
 
-A CPU miner for Argon2i, Argon2d, and Argon2id.
+A CPU and NVIDIA miner for TurtleCoin / Chukwa / Argon2id / WrkzCoin.
 
 #### Master Build Status
 
@@ -27,6 +27,7 @@ Want the miner to support another argon coin? Open an issue, or even better, ope
 ## Notes
 
 * Supports AVX-512, AVX-2, SSE4.1, SSSE3, SSE2 and NEON optimizations.
+* Supports NVIDIA GPUs.
 * You can set a priority to a pool to determine which ones are tried first. A smaller priority number means we will connect to it first. 0 = highest priority. If we are not connected to the highest priority pool, we will continuously retry connecting to higher priority pools.
 
 * Dev fee is 1%.
@@ -48,37 +49,106 @@ For example:
 
 ```json
 {
-    "optimizationMethod": "Auto",
+    "hardwareConfiguration": {
+        "cpu": {
+            "enabled": false,
+            "optimizationMethod": "Auto",
+            "threadCount": 12
+        },
+        "nvidia": {
+            "devices": [
+                {
+                    "desktopLag": 95.0,
+                    "enabled": true,
+                    "id": 0,
+                    "intensity": 100.0,
+                    "name": "GeForce GTX 1070"
+                }
+            ]
+        }
+    },
     "pools": [
         {
             "agent": "",
-            "algorithm": "turtlecoin",
-            "host": "pool.turtlecoin.dev",
-            "niceHash": false,
-            "password": "",
-            "port": 5555,
-            "rigID": "",
-            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW",
-            "priority": 0
-        },
-        {
-            "agent": "violetminer-v0.0.3",
-            "algorithm": "wrkzcoin",
-            "host": "publicnode.ydns.eu",
+            "algorithm": "wrkz",
+            "host": "fastpool.xyz",
             "niceHash": false,
             "password": "x",
-            "port": 3420,
-            "rigID": "rig1",
-            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7",
-            "priority": 1
+            "port": 3005,
+            "priority": 1,
+            "rigID": "",
+            "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
+        },
+        {
+            "agent": "",
+            "algorithm": "turtlecoin",
+            "host": "trtl.pool.mine2gether.com",
+            "niceHash": false,
+            "password": "x",
+            "port": 2225,
+            "priority": 3,
+            "rigID": "",
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
+        },
+        {
+            "agent": "",
+            "algorithm": "turtlecoin",
+            "host": "donate.futuregadget.xyz",
+            "niceHash": true,
+            "password": "x",
+            "port": 3333,
+            "priority": 4,
+            "rigID": "",
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
+        },
+        {
+            "agent": "",
+            "algorithm": "turtlecoin",
+            "host": "127.0.0.1",
+            "niceHash": true,
+            "password": "x",
+            "port": 5555,
+            "priority": 0,
+            "rigID": "",
+            "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         }
-
-    ],
-    "threadCount": 12
+    ]
 }
 ```
 
-### Optimization method
+### Disabling CPU/GPU/Specific Cards
+
+* If you want to disable CPU mining, either set `enabled` to `false` in the cpu section, or start the miner with the `--disableCPU` flag.
+* If you want to disable Nvidia mining, either set `enabled` to `false` for each card in the nvidia devices section, or start the miner with the `--disableNVIDIA` flag.
+
+* If you want to disable a specific Nvidia or AMD card, just set `enabled` to `false` in the nvidia devices section for the appropriate card.
+
+Note that changing the `name` field does not do anything. It is only there to help you identify which device has which id.
+It's highly recommended that you don't change the `name` or `id` fields, or you may end up with quite a confusing result.
+
+You can always delete your config file, and let the program regenerate it, if you mess up.
+
+### GPU Configuration
+
+#### Intensity
+
+* In addition to enabling and disabling specific cards, you can also configure how many threads and how much memory they use.
+* This is done by altering the `intensity` value in the config.
+* A value of `100` for intensity means the maximum threads and memory will be used.
+* A value of `0` for intensity means no threads and memory will be used.
+* Lower intensities don't neccessarily mean lower hashrate.
+
+#### Desktop Lag
+
+* The `desktopLag` value determines how long we will sleep between kernel launches.
+* The default value of `100` means there are no sleeps between launches.
+* This is appropriate for most setups, where you are just mining.
+* However, if you are mining on your personal PC, and your desktop is quite laggy while mining, you can use this setting to decrease the lags.
+* A value of 100 means maximum desktop lag, a value of 0 means minimum desktop lag.
+* You can see how long we will sleep between launches printed at startup.
+* A lower value of desktop lag means less hashrate, because we launch the hasher kernel less.
+
+### CPU Optimization method
 
 By default, the program will automatically choose the optimization method to use.
 
@@ -155,6 +225,10 @@ For 32-bit:
 For example, I get 7300h/s with GCC, and 10500h/s with Clang on a Ryzen 1600.
 
 If you're on ARM however, GCC gets slightly better hashrate.
+
+#### Disabling NVIDIA support
+
+Run cmake like so: `cmake -DNVIDIA=OFF ..`
 
 #### Ubuntu, using Clang
 

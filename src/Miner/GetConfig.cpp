@@ -20,18 +20,56 @@
 #include "cpu_features/include/cpuinfo_x86.h"
 #endif
 
-void to_json(nlohmann::json &j, const MinerConfig &config)
+#if defined(NVIDIA_ENABLED)
+#include "Backend/Nvidia/NvidiaUtils.h"
+#else
+std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual() { return {}; }
+#endif
+
+#if defined(AMD_ENABLED)
+#include "MinerManager/Amd/AmdManager.h"
+#else
+std::vector<AmdDevice> getAmdDevices() { return {}; }
+#endif
+
+std::vector<NvidiaDevice> getNvidiaDevices()
+{
+    std::vector<NvidiaDevice> devices;
+
+    /* We could probably do some sort of struct/tuple initialization here.. */
+    for (const auto &[name, enabled, id] : getNvidiaDevicesActual())
+    {
+        NvidiaDevice device;
+
+        device.name = name;
+        device.enabled = enabled;
+        device.id = id;
+
+        devices.push_back(device);
+    }
+
+    return devices;
+}
+
+void to_json(nlohmann::json &j, const CpuConfig &config)
 {
     j = {
-        {"threadCount", config.threadCount},
-        {"pools", config.pools},
-        {"optimizationMethod", Constants::optimizationMethodToString(config.optimizationMethod)}
+        {"enabled", config.enabled},
+        {"optimizationMethod", Constants::optimizationMethodToString(config.optimizationMethod)},
+        {"threadCount", config.threadCount}
     };
 }
 
-void from_json(const nlohmann::json &j, MinerConfig &config)
+void from_json(const nlohmann::json &j, CpuConfig &config)
 {
-    config.pools = j.at("pools").get<std::vector<Pool>>();
+    if (j.find("enabled") != j.end())
+    {
+        config.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        config.enabled = true;
+    }
 
     if (j.find("threadCount") != j.end())
     {
@@ -54,6 +92,199 @@ void from_json(const nlohmann::json &j, MinerConfig &config)
     else
     {
         config.optimizationMethod = Constants::AUTO;
+    }
+}
+
+void to_json(nlohmann::json &j, const NvidiaDevice &device)
+{
+    j = {
+        {"enabled", device.enabled},
+        {"name", device.name},
+        {"id", device.id},
+        {"intensity", device.intensity},
+        {"desktopLag", device.desktopLag}
+    };
+}
+
+void from_json(const nlohmann::json &j, NvidiaDevice &device)
+{
+    if (j.find("enabled") != j.end())
+    {
+        device.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        device.enabled = true;
+    }
+
+    device.name = j.at("name").get<std::string>();
+    device.id = j.at("id").get<uint16_t>();
+
+    if (j.find("intensity") != j.end())
+    {
+        device.intensity = j.at("intensity").get<float>();
+
+        if (device.intensity < 0.0 || device.intensity > 100.0)
+        {
+            throw std::invalid_argument("Intensity value of " + std::to_string(device.intensity) + " is invalid. Must be between 0.0 and 100.0");
+        }
+    }
+
+    if (j.find("desktopLag") != j.end())
+    {
+        device.desktopLag = j.at("desktopLag").get<float>();
+
+        if (device.desktopLag < 0.0 || device.desktopLag > 100.0)
+        {
+            throw std::invalid_argument("Desktop lag value of " + std::to_string(device.desktopLag) + " is invalid. Must be between 0.0 and 100.0");
+        }
+    }
+}
+
+void to_json(nlohmann::json &j, const AmdDevice &device)
+{
+    j = {
+        {"enabled", device.enabled},
+        {"name", device.name},
+        {"id", device.id},
+        {"intensity", device.intensity},
+        {"desktopLag", device.desktopLag}
+    };
+}
+
+void from_json(const nlohmann::json &j, AmdDevice &device)
+{
+    if (j.find("enabled") != j.end())
+    {
+        device.enabled = j.at("enabled").get<bool>();
+    }
+    else
+    {
+        device.enabled = true;
+    }
+
+    device.name = j.at("name").get<std::string>();
+    device.id = j.at("id").get<uint16_t>();
+
+    if (j.find("intensity") != j.end())
+    {
+        device.intensity = j.at("intensity").get<float>();
+
+        if (device.intensity < 0.0 || device.intensity > 100.0)
+        {
+            throw std::invalid_argument("Intensity value of " + std::to_string(device.intensity) + " is invalid. Must be between 0.0 and 100.0");
+        }
+    }
+
+    if (j.find("desktopLag") != j.end())
+    {
+        device.desktopLag = j.at("desktopLag").get<float>();
+
+        if (device.desktopLag < 0.0 || device.desktopLag > 100.0)
+        {
+            throw std::invalid_argument("Desktop lag value of " + std::to_string(device.desktopLag) + " is invalid. Must be between 0.0 and 100.0");
+        }
+    }
+}
+
+void to_json(nlohmann::json &j, const NvidiaConfig &config)
+{
+    j = {
+        {"devices", config.devices}
+    };
+}
+
+void from_json(const nlohmann::json &j, NvidiaConfig &config)
+{
+    if (j.find("devices") != j.end())
+    {
+        config.devices = j.at("devices").get<std::vector<NvidiaDevice>>();
+    }
+    else
+    {
+        config.devices = getNvidiaDevices();
+    }
+}
+
+void to_json(nlohmann::json &j, const AmdConfig &config)
+{
+    j = {
+        {"devices", config.devices}
+    };
+}
+
+void from_json(const nlohmann::json &j, AmdConfig &config)
+{
+    if (j.find("devices") != j.end())
+    {
+        config.devices = j.at("devices").get<std::vector<AmdDevice>>();
+    }
+    else
+    {
+        config.devices = getAmdDevices();
+    }
+}
+
+void to_json(nlohmann::json &j, const HardwareConfig &config)
+{
+    j = {
+        {"cpu", config.cpu},
+        {"nvidia", config.nvidia},
+        /*{"amd", config.amd}*/
+    };
+}
+
+void from_json(const nlohmann::json &j, HardwareConfig &config)
+{
+    if (j.find("cpu") != j.end())
+    {
+        config.cpu = j.at("cpu").get<CpuConfig>();
+    }
+    else
+    {
+        /* Default is fine for CPU right now */
+    }
+
+    if (j.find("nvidia") != j.end())
+    {
+        config.nvidia = j.at("nvidia").get<NvidiaConfig>();
+    }
+    else
+    {
+        config.nvidia.devices = getNvidiaDevices();
+    }
+
+    if (j.find("amd") != j.end())
+    {
+        config.amd = j.at("amd").get<AmdConfig>();
+    }
+    else
+    {
+        config.amd.devices = getAmdDevices();
+    }
+}
+
+
+void to_json(nlohmann::json &j, const MinerConfig &config)
+{
+    j = {
+        {"pools", config.pools},
+        {"hardwareConfiguration", *(config.hardwareConfiguration)}
+    };
+}
+
+void from_json(const nlohmann::json &j, MinerConfig &config)
+{
+    config.pools = j.at("pools").get<std::vector<Pool>>();
+
+    if (j.find("hardwareConfiguration") != j.end())
+    {
+        *config.hardwareConfiguration = j.at("hardwareConfiguration").get<HardwareConfig>();
+    }
+    else
+    {
+        config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+        config.hardwareConfiguration->amd.devices = getAmdDevices();
     }
 }
 
@@ -191,9 +422,13 @@ Pool getPool()
     {
         std::cout << InformationMsg("\nAvailable mining algorithms:") << std::endl;
 
-        for (const auto [algorithm, hashingFunc] : ArgonVariant::Algorithms)
+        for (const auto [algorithmName, algoEnum, shouldDisplay] : ArgonVariant::algorithmNameMapping)
         {
-            std::cout << SuccessMsg("* ") << SuccessMsg(algorithm) << std::endl;
+            /* We don't print every single alias because it would get a little silly. */
+            if (shouldDisplay)
+            {
+                std::cout << SuccessMsg("* ") << SuccessMsg(algorithmName) << std::endl;
+            }
         }
 
         std::cout << InformationMsg("\nEnter the algorithm you wish to mine with on this pool: ");
@@ -202,32 +437,18 @@ Pool getPool()
 
         std::getline(std::cin, algorithm);
 
-        Utilities::trim(algorithm);
-
-        std::transform(algorithm.begin(), algorithm.end(), algorithm.begin(), ::tolower);
-
         if (algorithm == "")
         {
             continue;
         }
 
-        const auto it = std::find_if(
-            ArgonVariant::Algorithms.begin(), 
-            ArgonVariant::Algorithms.end(),
-            [&algorithm](const auto algo)
+        try
         {
-            std::string theirAlgo = algo.first;
-            std::transform(theirAlgo.begin(), theirAlgo.end(), theirAlgo.begin(), ::tolower);
-            return theirAlgo == algorithm;
-        });
-
-        if (it != ArgonVariant::Algorithms.end())
-        {
-            pool.algorithm = it->first;
-            pool.algorithmGenerator = it->second;
+            ArgonVariant::algorithmNameToCanonical(algorithm);
+            pool.algorithm = algorithm;
             break;
         }
-        else
+        catch (const std::exception &)
         {
             std::cout << WarningMsg("Unknown algorithm \"" + algorithm + "\". Try again.") << std::endl;
         }
@@ -271,14 +492,8 @@ std::vector<Pool> getPools()
     return pools;
 }
 
-MinerConfig getConfigInteractively()
+void writeConfigToDisk(MinerConfig config)
 {
-    MinerConfig config;
-
-    config.pools = getPools();
-    config.optimizationMethod = Constants::AUTO;
-    config.interactive = true;
-
     std::ofstream configFile(Constants::CONFIG_FILE_NAME);
 
     nlohmann::json j = config;
@@ -286,7 +501,6 @@ MinerConfig getConfigInteractively()
     if (configFile)
     {
         configFile << j.dump(4) << std::endl;
-        std::cout << SuccessMsg("Wrote config file to " + Constants::CONFIG_FILE_NAME) << std::endl;
     }
     else
     {
@@ -294,6 +508,20 @@ MinerConfig getConfigInteractively()
                   << std::endl << std::endl
                   << "Config:" << std::endl << j.dump(4) << std::endl;
     }
+}
+
+MinerConfig getConfigInteractively()
+{
+    MinerConfig config;
+
+    config.pools = getPools();
+    config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+    config.hardwareConfiguration->amd.devices = getAmdDevices();
+    config.hardwareConfiguration->cpu.enabled = true;
+    config.hardwareConfiguration->cpu.optimizationMethod = Constants::AUTO;
+    config.interactive = true;
+
+    writeConfigToDisk(config);
 
     return config;
 }
@@ -320,6 +548,8 @@ MinerConfig getConfigFromJSON(const std::string &configLocation)
                                  (std::istreambuf_iterator<char>()));
 
         const MinerConfig jsonConfig = nlohmann::json::parse(fileContents);
+
+        writeConfigToDisk(jsonConfig);
 
         return jsonConfig;
     }
@@ -362,6 +592,9 @@ MinerConfig getMinerConfig(int argc, char **argv)
 
     bool help;
     bool version;
+    bool disableCPU;
+    bool disableNVIDIA;
+    bool disableAMD;
 
     cxxopts::Options options(argv[0], "");
 
@@ -393,7 +626,17 @@ MinerConfig getMinerConfig(int argc, char **argv)
          cxxopts::value<std::string>(poolConfig.algorithm), "<algorithm>")
 
         ("threads", "The number of mining threads to use",
-         cxxopts::value<uint32_t>(config.threadCount)->default_value(std::to_string(config.threadCount)), "<threads>");
+         cxxopts::value<uint32_t>(config.hardwareConfiguration->cpu.threadCount)->default_value(
+            std::to_string(config.hardwareConfiguration->cpu.threadCount)), "<threads>")
+
+        ("disableCPU", "Disable CPU mining",
+         cxxopts::value<bool>(disableCPU)->implicit_value("true"))
+
+        ("disableNVIDIA", "Disable Nvidia mining",
+         cxxopts::value<bool>(disableNVIDIA)->implicit_value("true"))
+
+        ("disableAMD", "Disable AMD mining",
+         cxxopts::value<bool>(disableAMD)->implicit_value("true"));
 
     try
     {
@@ -456,26 +699,54 @@ MinerConfig getMinerConfig(int argc, char **argv)
                 Console::exitOrWaitForInput(1);
             }
 
-            const auto it = ArgonVariant::Algorithms.find(poolConfig.algorithm);
-
-            if (it == ArgonVariant::Algorithms.end())
+            try
+            {
+                ArgonVariant::algorithmNameToCanonical(poolConfig.algorithm);
+            }
+            catch (const std::exception &)
             {
                 std::cout << WarningMsg("Algorithm \"" + poolConfig.algorithm + "\" is not a known algorithm!") << std::endl;
 
                 std::cout << InformationMsg("Available mining algorithms:") << std::endl;
 
-                for (const auto [algorithm, hashingFunc] : ArgonVariant::Algorithms)
+                for (const auto [algorithmName, algoEnum, shouldDisplay] : ArgonVariant::algorithmNameMapping)
                 {
-                    std::cout << SuccessMsg("* ") << SuccessMsg(algorithm) << std::endl;
+                    /* We don't print every single alias because it would get a little silly. */
+                    if (shouldDisplay)
+                    {
+                        std::cout << SuccessMsg("* ") << SuccessMsg(algorithmName) << std::endl;
+                    }
                 }
 
                 Console::exitOrWaitForInput(1);
             }
 
-            poolConfig.algorithmGenerator = it->second;
-
             config.pools.push_back(poolConfig);
-            config.optimizationMethod = Constants::AUTO;
+            config.hardwareConfiguration->nvidia.devices = getNvidiaDevices();
+            config.hardwareConfiguration->amd.devices = getAmdDevices();
+            config.hardwareConfiguration->cpu.enabled = true;
+            config.hardwareConfiguration->cpu.optimizationMethod = Constants::AUTO;
+
+            if (disableCPU)
+            {
+                config.hardwareConfiguration->cpu.enabled = false;
+            }
+
+            if (disableNVIDIA)
+            {
+                for (auto &device : config.hardwareConfiguration->nvidia.devices)
+                {
+                    device.enabled = false;
+                }
+            }
+
+            if (disableAMD)
+            {
+                for (auto &device : config.hardwareConfiguration->amd.devices)
+                {
+                    device.enabled = false;
+                }
+            }
 
             return config;
         }

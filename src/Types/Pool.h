@@ -48,12 +48,26 @@ struct Pool
     /* The priority of this pool in the list of pools */
     size_t priority = 0;
 
-    /* Gets an instance of the mining algorithm used for this pool */
-    std::function<std::shared_ptr<IHashingAlgorithm>(void)> algorithmGenerator;
-
-    inline std::string getAgent() const
+    std::string getAgent() const
     {
         return agent == "" ? "violetminer-" + Constants::VERSION : agent;
+    }
+
+    bool operator==(const Pool& other) const
+    {
+        return host         == other.host
+            && port         == other.port
+            && username     == other.username
+            && password     == other.password
+            && rigID        == other.rigID
+            && algorithm    == other.algorithm
+            && agent        == other.agent
+            && loginID      == other.loginID;
+    }
+
+    bool operator!=(const Pool& other) const
+    {
+        return !operator==(other);
     }
 };
 
@@ -90,14 +104,14 @@ inline void from_json(const nlohmann::json &j, Pool &pool)
 
     pool.algorithm = j.at("algorithm").get<std::string>();
 
-    const auto it = ArgonVariant::Algorithms.find(pool.algorithm);
-
-    if (it == ArgonVariant::Algorithms.end())
+    try
+    {
+        ArgonVariant::algorithmNameToCanonical(pool.algorithm);
+    }
+    catch (const std::exception &)
     {
         throw std::invalid_argument("Algorithm \"" + pool.algorithm + "\" is not a known algorithm!");
     }
-
-    pool.algorithmGenerator = it->second;
 
     if (j.find("agent") != j.end())
     {

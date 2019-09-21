@@ -121,10 +121,12 @@ void PoolCommunication::registerHandlers()
                 return;
             }
 
-            const auto poolMessage = parsePoolMessage(message);
+            auto poolMessage = parsePoolMessage(message);
 
             if (auto job = std::get_if<JobMessage>(&poolMessage))
             {
+                updateJobInfoFromPool(job->job);
+
                 m_currentJob = job->job;
 
                 if (m_onNewJob)
@@ -201,7 +203,7 @@ Job PoolCommunication::getJob()
 }
 
 void PoolCommunication::submitShare(
-    const std::vector<uint8_t> &hash,
+    const uint8_t *hash,
     const std::string jobID,
     const uint32_t nonce)
 {
@@ -211,7 +213,7 @@ void PoolCommunication::submitShare(
             {"id", m_currentPool.loginID},
             {"job_id", jobID},
             {"nonce", Utilities::toHex(nonce)},
-            {"result", Utilities::toHex(hash)},
+            {"result", Utilities::toHex(hash, 32)},
             {"rigid", m_currentPool.rigID},
             {"agent", m_currentPool.getAgent()},
         }},
@@ -296,10 +298,30 @@ bool PoolCommunication::tryLogin(const Pool &pool)
 
         if (res)
         {
+            LoginMessage message;
+
             try
             {
-                const LoginMessage message = nlohmann::json::parse(*res);
+                message = nlohmann::json::parse(*res);
+            }
+            catch (const std::exception &e)
+            {
+                try
+                {
+                    /* Failed to parse as LoginMessage. Maybe it's an error message? */
+                    const ErrorMessage errMessage = nlohmann::json::parse(*res);
+                    loginFailed(pool, i, false, errMessage.error.errorMessage);
+                }
+                catch (const std::exception &)
+                {
+                    loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
+                }
 
+                continue;
+            }
+
+            try
+            {
                 std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Logged in.") << std::endl;
                 
                 if (m_socket)
@@ -310,6 +332,7 @@ bool PoolCommunication::tryLogin(const Pool &pool)
                 m_socket = socket;
                 m_currentPool = pool;
                 m_currentPool.loginID = message.loginID;
+                updateJobInfoFromPool(message.job);
                 m_currentJob = message.job;
 
                 if (*message.job.nonce() != 0)
@@ -325,21 +348,10 @@ bool PoolCommunication::tryLogin(const Pool &pool)
                 }
 
                 return true;
-
             }
-            catch (const std::exception &)
+            catch (const std::exception &e)
             {
-                try
-                {
-                    /* Failed to parse as LoginMessage. Maybe it's an error message? */
-                    const ErrorMessage message = nlohmann::json::parse(*res);
-                    loginFailed(pool, i, false, message.error.errorMessage);
-                }
-                catch (const std::exception &e)
-                {
-                    loginFailed(pool, i, false, "Failed to parse message from pool (" + std::string(e.what()) + ") (" + *res + ")");
-                }
-
+                loginFailed(pool, i, false, std::string(e.what()));
                 continue;
             }
         }
@@ -428,12 +440,13 @@ void PoolCommunication::keepAlive()
     m_socket->sendMessage(pingMsg.dump() + "\n");
 }
 
-std::shared_ptr<IHashingAlgorithm> PoolCommunication::getMiningAlgorithm() const
+void PoolCommunication::updateJobInfoFromPool(Job &job) const
 {
-    return m_currentPool.algorithmGenerator();
+    job.isNiceHash = isNiceHash();
+    job.algorithm = getMiningAlgorithm();
 }
 
-std::string PoolCommunication::getAlgorithmName() const
+std::string PoolCommunication::getMiningAlgorithm() const
 {
     return m_currentPool.algorithm;
 }

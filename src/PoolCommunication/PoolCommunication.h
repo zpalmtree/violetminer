@@ -28,7 +28,7 @@ class PoolCommunication
 
     /* Submit a *valid* share to the pool. */
     void submitShare(
-        const std::vector<uint8_t> &hash,
+        const uint8_t *hash,
         const std::string jobID,
         const uint32_t nonce);
 
@@ -52,7 +52,7 @@ class PoolCommunication
     void printPool() const;
 
     /* Gets the algorithm to use for the current pool */
-    std::shared_ptr<IHashingAlgorithm> getMiningAlgorithm() const;
+    std::string getMiningAlgorithm() const;
 
     /* Gets the name of the current algorithm */
     std::string getAlgorithmName() const;
@@ -73,6 +73,9 @@ class PoolCommunication
     void getNewJob();
 
     bool tryLogin(const Pool &pool);
+
+    /* Set nicehash, algo name, etc on the job info based on the current pool */
+    void updateJobInfoFromPool(Job &job) const;
 
     /* The current pool we are connected to */
     Pool m_currentPool;
