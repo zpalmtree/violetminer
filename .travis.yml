@@ -143,10 +143,10 @@ matrix:
     - ls "C:\Program Files (x86)\Microsoft Visual Studio"
     - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017"
     #- cp CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\Microsoft\VC\v150\BuildCustomizations"
-    - set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\";%PATH%
+    - PATH="$PATH:C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\"
     - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\nvcc"
     - mkdir build && cd build
-    - set PATH="$MSBUILD_PATH";%PATH%
+    - PATH="$PATH:$MSBUILD_PATH"
     - cmake -G "Visual Studio 15 2017 Win64"
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 ..
