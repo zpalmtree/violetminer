@@ -144,6 +144,8 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
               << "GPU " << gpu.id << "| Sleeping for " << seconds << " seconds between kernel launches"
               << " (" << gpuLag << " microseconds)" << std::endl;
 
+    bool failure = false;
+
     while (!m_shouldStop)
     {
         Job job = m_currentJob;
@@ -201,13 +203,26 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
                     m_submitValidHash({ hashResult.hash, job.jobID, hashResult.nonce, job.target, gpuName });
                 }
 
-                std::this_thread::sleep_for(std::chrono::microseconds(gpuLag));
+                if (gpuLag > 0)
+                {
+                    std::this_thread::sleep_for(std::chrono::microseconds(gpuLag));
+                }
+
+                failure = false;
             }
             catch (const std::exception &e)
             {
                 std::cout << WarningMsg("Caught unexpected error from GPU hasher: " + std::string(e.what())) << std::endl;
                 std::cout << WarningMsg("Stopping mining on " + gpuName) << std::endl;
-                return;
+
+                /* We allow one failure, as non sticky errors are recoverable.
+                 * Sticky errors however, require the process to be relaunched. */
+                if (failure)
+                {
+                    return;
+                }
+
+                failure = true;
             }
 
             i++;
