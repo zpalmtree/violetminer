@@ -133,22 +133,14 @@ matrix:
     - RELEASE_FILENAME="violetminer-win64"
     - RELEASE_FILETYPE="zip"
     - _DEPLOYABLE="true"
-    - CUDA_VER=10.1
+    - CUDA_VER="10.1"
     - CUDA_ARCHIVE="cuda_10.1.243_426.00_win10.exe"
     script:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
-    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools"
-    #- cp CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\Microsoft\VC\v150\BuildCustomizations"
-    - export PATH=$PATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\"
-    - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\nvcc"
-    - mkdir build && cd build
-    - export PATH=$MSBUILD_PATH:$PATH
-    - cmake -G "Visual Studio 15 2017 Win64"
-            -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 ..
-    - MSBuild violetminer.sln /p:Configuration=Release /m
+    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC"
+    - ../scripts/win-install.bat
     - cd Release
     - mkdir $RELEASE_FILENAME
     - cp violetminer.exe $RELEASE_FILENAME
