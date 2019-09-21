@@ -19,16 +19,6 @@ environment:
     #  CUDA_ARCHIVE: cuda_10.1.168_425.25_win10.exe
 
     ###########################################################################
-    # Build x64 version using MSVC 2017
-    ###########################################################################
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
-      MSVC_SETUP_ARG: x64
-      TAG: win64
-      CUDA_VER: 10.1
-      CUDA_ARCHIVE: cuda_10.1.243_426.00_win10.exe
-
-    ###########################################################################
     # Build 64 bit version using clang-cl backed by MSVC 2019
     # -------------------------------------------------------------------------
     # Note that building against MSVC 2019 is only supported with a newer clang
@@ -43,17 +33,19 @@ environment:
       CUDA_VER: 10.1
       CUDA_ARCHIVE: cuda_10.1.243_426.00_win10.exe
 
+    ###########################################################################
+    # Build x64 version using MSVC 2019
+    ###########################################################################
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
+      MSVC_SETUP_ARG: x64
+      TAG: win64
+      CUDA_VER: 10.1
+      CUDA_ARCHIVE: cuda_10.1.243_426.00_win10.exe
+
 install:
   - mkdir C:\projects\deps
   - cd C:\projects\deps
-
-  # Setup A newer CMake
-  #- set CMAKE_URL=https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-win64-x64.zip
-  #- appveyor DownloadFile %CMAKE_URL% -FileName cmake.zip
-  #- 7z x cmake.zip -oC:\projects\deps > nul
-  #- move C:\projects\deps\cmake-* C:\projects\deps\cmake
-  #- set PATH=C:\projects\deps\cmake\bin;%PATH%
-  #- cmake --version
 
   # Upgrade clang if necessary
   - IF DEFINED INSTALL_NEW_CLANG appveyor DownloadFile %CLANG_URL% -FileName llvm-installer.exe
@@ -84,6 +76,8 @@ build_script:
   - git submodule update --init --recursive
   - md build
   - cd build
+  - echo %USE_CLANG%
+  - echo %CMAKE_EXTRA_OPTIONS%
   - cmake -G "Visual Studio 16 2019"
           -A x64
           -DCMAKE_BUILD_TYPE=Release
