@@ -19,9 +19,7 @@ environment:
     #  CUDA_ARCHIVE: cuda_10.1.168_425.25_win10.exe
 
     ###########################################################################
-    # Build 64 bit version using clang-cl backed by MSVC 2019
-    # -------------------------------------------------------------------------
-    # Note that building against MSVC 2019 is only supported with a newer clang
+    # Build 64 bit version using clang
     ###########################################################################
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       MSVC_SETUP_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat
@@ -54,7 +52,13 @@ install:
   - IF DEFINED USE_CLANG clang --version
   - IF DEFINED USE_CLANG git clone https://github.com/zpalmtree/llvm-vs2017-integration.git
   - IF DEFINED USE_CLANG cd llvm-vs2017-integration
-  - IF DEFINED USE_CLANG AutoSetup
+  - IF DEFINED USE_CLANG 
+  - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017")
+  - IF DEFINED USE_CLANG if not exist "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp" (mkdir "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp")
+  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.props"
+  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017\Toolset.targets"
+  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.props "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.props"
+  - IF DEFINED USE_CLANG copy Toolset-llvm-vs2017-xp-x64.targets "%VS_PROOT_DIR%\x64\PlatformToolsets\LLVM-vs2017_xp\Toolset.targets"
   - IF DEFINED USE_CLANG cd ..
 
   # Install CUDA
@@ -82,12 +86,13 @@ build_script:
   - git submodule update --init --recursive
   - md build
   - cd build
-  - cmake -G "Visual Studio 16 2019"
-          -A x64
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1
-          %CMAKE_EXTRA_OPTIONS% ..
-        || cat CMakeFiles/CMakeError.log || cat CMakeFiles/CMakeOutput.log
+  - IF DEFINED USE_CLANG cmake -DCMAKE_BUILD_TYPE=Release %CMAKE_EXTRA_OPTIONS% ..
+  - IF NOT DEFINED USE_CLANG cmake -G "Visual Studio 16 2019"
+                                   -A x64
+                                   -DCMAKE_BUILD_TYPE=Release
+                                   -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1
+                                   %CMAKE_EXTRA_OPTIONS% ..
+                                || cat CMakeFiles/CMakeError.log || cat CMakeFiles/CMakeOutput.log
   - MSBuild violetminer.sln /p:Configuration=Release /m
   - cd Release
   - mkdir violetminer-%TAG%
