@@ -139,10 +139,7 @@ matrix:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
-    - ls "C:\Program Files"
-    - ls "C:\Program Files\NVIDIA GPU Computing Toolkit"
-    - ls "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA"
-    - ls "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1"
+    - ls "C:\Program Files (x86)/Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
     - ./scripts/win-install.bat
     - cd Release
     - mkdir $RELEASE_FILENAME
