@@ -80,11 +80,12 @@ matrix:
     - CUDA_ARCHIVE="cuda_10.1.243_426.00_win10.exe"
     script:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
-    #- ps: Start-Process -FilePath "$CUDA_ARCHIVE" -ArgumentList "-s nvcc_$CUDA_VER" -Wait -NoNewWindow
-    #- travis_wait $CUDA_ARCHIVE -s nvcc_$CUDA_VER
-    - START /WAIT $CUDA_ARCHIVE -s nvcc_$CUDA_VER
+    - PowerShell Start-Process -FilePath "$CUDA_ARCHIVE" -ArgumentList "-s nvcc_$CUDA_VER" -Wait -NoNewWindow
+    #- START /WAIT $CUDA_ARCHIVE -s nvcc_$CUDA_VER
     - 7z x $CUDA_ARCHIVE
-    - copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v150\BuildCustomizations"
+    - ls "C:\Program Files (x86)\Microsoft Visual Studio"
+    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\Microsoft\VC"
+    - copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\Microsoft\VC\v150\BuildCustomizations"
     - set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\";$PATH
     - set CUDACXX="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$CUDA_VER\bin\nvcc"
     - mkdir build && cd build
