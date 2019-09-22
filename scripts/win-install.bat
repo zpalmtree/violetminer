@@ -3,9 +3,6 @@ copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExte
 set PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin;%PATH%
 set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin;%PATH%
 
-:: set CUDACXX=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\bin\nvcc
-:: REM set CUDA_TOOLKIT_ROOT_DIR=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
-:: REM set CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
 set CudaToolkitDir=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
 
 echo %PATH%

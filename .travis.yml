@@ -140,9 +140,8 @@ matrix:
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
     - ./scripts/win-install.bat
-    - ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build"
-    - cat "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-    - cat "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Tools/MSVC/14.16.27023/bin/HostX86/x64/../../../../../../../VC/Auxiliary/Build/vcvars64.bat"
+    - ls
+    - cd build
     - cd Release
     - mkdir $RELEASE_FILENAME
     - cp violetminer.exe $RELEASE_FILENAME
