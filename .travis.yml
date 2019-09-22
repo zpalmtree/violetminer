@@ -159,11 +159,11 @@ matrix:
     script:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
     - wget -nv https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/LLVM-8.0.1-win64.exe
-    - PowerShell -Command "Start-Process -FilePath \"LLVM-8.0.1-win64.exe\" -ArgumentList \"/S /D=C:\\\"Program Files\LLVM\" -Wait -NoNewWindow"
     - clang --version
+    - clang-cl --version
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
-    - ./scripts/win-install.bat
+    - ./scripts/win-clang-install.bat
     - cd build
     - cd Release
     - mkdir $RELEASE_FILENAME
