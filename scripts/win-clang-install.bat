@@ -14,9 +14,11 @@ md build
 
 cd build
 
-cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe .. || type CMakeFiles\CMakeError.log || type CMakeFiles\CMakeOutput.log || exit /b 1
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VS_PLATFORM_TOOLSET_CUDA=10.1 -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe .. || type CMakeFiles\CMakeError.log || type CMakeFiles\CMakeOutput.log || exit /b 1
 
-MSBuild violetminer.sln /p:Configuration=Release /m /v:n || exit /b 1 
+:: MSBuild violetminer.sln /p:Configuration=Release /m /v:n || exit /b 1 
+
+make
 
 cd Release
 
