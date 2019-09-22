@@ -11,7 +11,6 @@ set CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
 set CudaToolkitDir=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
 
 nvcc --version
-MSBuild --version
 
 md build
 
