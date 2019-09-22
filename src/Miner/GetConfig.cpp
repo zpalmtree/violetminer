@@ -470,12 +470,16 @@ Pool getPool()
     {
         std::cout << InformationMsg("\nAvailable mining algorithms:") << std::endl;
 
+        int i = 0;
+        std::unordered_map<int, std:: string> availableAlgorithms;
         for (const auto [algorithmName, algoEnum, shouldDisplay] : ArgonVariant::algorithmNameMapping)
         {
             /* We don't print every single alias because it would get a little silly. */
             if (shouldDisplay)
             {
-                std::cout << SuccessMsg("* ") << SuccessMsg(algorithmName) << std::endl;
+                i++;
+                std::cout << SuccessMsg("(" + std::to_string(i) + ") " + algorithmName) << std::endl;
+                availableAlgorithms[i] = algorithmName;
             }
         }
 
@@ -485,10 +489,37 @@ Pool getPool()
 
         std::getline(std::cin, algorithm);
 
+        int algorithmNumber;
+        bool algorithmIsNumber;
+
         if (algorithm == "")
         {
             continue;
         }
+
+        try
+        {
+            algorithmNumber = std::stoi(algorithm);
+            algorithmIsNumber = true;
+        }
+        catch (const std::invalid_argument &)
+        {
+            algorithmIsNumber = false;
+        }
+
+        if (algorithmIsNumber) 
+        {
+            auto selectedAlgorithm = availableAlgorithms.find(algorithmNumber); // finding if item is present in map
+            if (selectedAlgorithm != availableAlgorithms.end())
+            {
+                algorithm = selectedAlgorithm->second;
+            }
+            else
+            {
+                std::cout << WarningMsg("Bad input, expected an algorithm name, or number from ") << InformationMsg("1") << WarningMsg(" to ") << InformationMsg(availableAlgorithms.size()) << std::endl;
+                continue;
+            }
+        } 
 
         try
         {
