@@ -140,9 +140,12 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
 
     const double seconds = gpuLag / 1000000.0;
 
-    std::cout << "GPU " << gpu.id << "| Intensity: " << gpu.intensity << ", Desktop Lag: " << gpu.desktopLag << std::endl
-              << "GPU " << gpu.id << "| Sleeping for " << seconds << " seconds between kernel launches"
-              << " (" << gpuLag << " microseconds)" << std::endl;
+    std::cout << WhiteMsg("[GPU " + std::to_string(gpu.id) + "] ")
+              << InformationMsg("Intensity: ") << SuccessMsg(gpu.intensity) << SuccessMsg(", ")
+              << InformationMsg("Desktop Lag: ") << SuccessMsg(gpu.desktopLag) << "\n"
+              << WhiteMsg("[GPU " + std::to_string(gpu.id) + "] ")
+              << InformationMsg("Sleeping for ") << InformationMsg(seconds) << InformationMsg(" seconds between kernel launches")
+              << SuccessMsg(" (") << SuccessMsg(gpuLag) << SuccessMsg(" microseconds)") << std::endl;
 
     bool failure = false;
 
@@ -163,6 +166,18 @@ void Nvidia::hash(NvidiaDevice &gpu, const uint32_t threadNumber)
                 algorithm->getIterations(),
                 gpu.intensity
             );
+
+            std::cout << WhiteMsg("[GPU " + std::to_string(gpu.id) + "] ")
+                      << InformationMsg("Allocating ")
+                      << SuccessMsg(static_cast<double>(state.launchParams.memSize) / (1024 * 1024 * 1024)) 
+                      << SuccessMsg("GB") << InformationMsg(" of GPU memory.") << "\n"
+                      << WhiteMsg("[GPU " + std::to_string(gpu.id) + "] ")
+                      << InformationMsg("Performing ")
+                      << SuccessMsg(state.launchParams.noncesPerRun)
+                      << InformationMsg(" iterations per kernel launch, with ")
+                      << SuccessMsg(state.launchParams.jobsPerBlock)
+                      << InformationMsg(" jobs per block.")
+                      << std::endl;
 
             currentAlgorithm = job.algorithm;
 
