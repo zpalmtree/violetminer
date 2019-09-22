@@ -158,7 +158,6 @@ matrix:
     - CUDA_ARCHIVE="cuda_10.1.243_426.00_win10.exe"
     script:
     - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
-    - wget -nv https://github.com/llvm/llvm-project/releases/download/llvmorg-8.0.1/LLVM-8.0.1-win64.exe
     - clang --version
     - clang-cl --version
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
