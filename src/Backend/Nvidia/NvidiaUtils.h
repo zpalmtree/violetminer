@@ -8,8 +8,10 @@
 #include <string>
 #include <vector>
 
+int getDeviceCount();
+
+std::string getDeviceName(uint16_t deviceId);
+
 std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual();
 
 void printNvidiaHeader();
-
-uint32_t getNoncesPerRun(const size_t scratchpadSize, const uint32_t gpuIndex);

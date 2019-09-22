@@ -187,6 +187,54 @@ void from_json(const nlohmann::json &j, AmdDevice &device)
     }
 }
 
+bool verifyNvidiaConfig(const NvidiaConfig &config)
+{
+    #if defined(NVIDIA_ENABLED)
+    int numberDevices = getDeviceCount();
+
+    for (const auto &device : config.devices)
+    {
+        if (!device.enabled)
+        {
+            continue;
+        }
+
+        if (numberDevices == 0 || device.id > numberDevices - 1)
+        {
+            std::cout << WarningMsg("Config is invalid. Device listed in config (")
+                      << InformationMsg(device.name) << WarningMsg(") with id of ")
+                      << InformationMsg(device.id) << WarningMsg(" is not detected by CUDA.")
+                      << std::endl
+                      << WarningMsg("Either remove this device from the config, ")
+                      << WarningMsg("or delete the config file and let the program re-generate it.")
+                      << std::endl << std::endl
+                      << InformationMsg("This error can occur if you used the config file from another computer")
+                      << InformationMsg(", recently changed hardware, or updated your drivers. If the latter, try rebooting your PC.")
+                      << std::endl;
+
+            return false;
+        }
+
+        std::string actualName = getDeviceName(device.id);
+
+        if (device.name != actualName)
+        {
+            std::cout << WarningMsg("Warning: Device listed in config (")
+                      << InformationMsg(device.name) << WarningMsg(") with id of ")
+                      << InformationMsg(device.id) << WarningMsg(" does not match expected name of ")
+                      << InformationMsg(actualName) << std::endl
+                      << WarningMsg("This is not an error, but may cause confusing program output.")
+                      << std::endl << std::endl
+                      << InformationMsg("Consider renaming this device in the config to ")
+                      << InformationMsg(actualName) << InformationMsg(", or delete the config file and let the program re-generate it.")
+                      << std::endl << std::endl;
+        }
+    }
+    #endif
+
+    return true;
+}
+
 void to_json(nlohmann::json &j, const NvidiaConfig &config)
 {
     j = {
@@ -548,6 +596,11 @@ MinerConfig getConfigFromJSON(const std::string &configLocation)
                                  (std::istreambuf_iterator<char>()));
 
         const MinerConfig jsonConfig = nlohmann::json::parse(fileContents);
+
+        if (!verifyNvidiaConfig(jsonConfig.hardwareConfiguration->nvidia))
+        {
+            Console::exitOrWaitForInput(1);
+        }
 
         writeConfigToDisk(jsonConfig);
 

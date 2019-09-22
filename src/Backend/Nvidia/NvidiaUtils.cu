@@ -9,19 +9,29 @@
 #include "Nvidia/Argon2.h"
 #include "Utilities/ColouredMsg.h"
 
+int getDeviceCount()
+{
+    int numberDevices;
+    cudaGetDeviceCount(&numberDevices);
+    return numberDevices;
+}
+
+std::string getDeviceName(uint16_t deviceId)
+{
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, deviceId);
+    return prop.name;
+}
+
 std::vector<std::tuple<std::string, bool, int>> getNvidiaDevicesActual()
 {
     std::vector<std::tuple<std::string, bool, int>> devices;
 
-    int numberDevices;
-    cudaGetDeviceCount(&numberDevices);
+    int numberDevices = getDeviceCount();
 
     for (int i = 0; i < numberDevices; i++)
     {
-        cudaDeviceProp prop;
-        cudaGetDeviceProperties(&prop, i);
-
-        devices.push_back(std::make_tuple(prop.name, true, i));
+        devices.push_back(std::make_tuple(getDeviceName(i), true, i));
     }
 
     return devices;
@@ -31,8 +41,7 @@ void printNvidiaHeader()
 {
     std::cout << InformationMsg<std::string>("* ") << WhiteMsg<std::string>("NVIDIA DEVICES", 25);
 
-    int numberDevices;
-    cudaGetDeviceCount(&numberDevices);
+    int numberDevices = getDeviceCount();
 
     if (numberDevices == 0)
     {
@@ -72,23 +81,4 @@ void printNvidiaHeader()
     }
 
     std::cout << std::endl;
-}
-
-uint32_t getNoncesPerRun(const size_t scratchpadSize, const uint32_t gpuIndex)
-{
-    cudaDeviceProp properties;
-
-    /* Figure out how much memory we have available */
-    cudaGetDeviceProperties(&properties, gpuIndex);
-
-    const size_t ONE_MB = 1024 * 1024;
-    const size_t ONE_GB = ONE_MB * 1024;
-
-    size_t memoryAvailable = (properties.totalGlobalMem / ONE_GB - 1) * (ONE_GB / ONE_MB);
-
-    /* The amount of nonces we're going to try per kernel launch */
-    uint32_t noncesPerRun = (memoryAvailable * ONE_MB) / (1024 * scratchpadSize);
-    noncesPerRun = (noncesPerRun / 128) * 128;
-
-    return noncesPerRun;
 }
