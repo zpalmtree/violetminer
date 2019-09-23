@@ -264,11 +264,20 @@ void PoolCommunication::startManaging()
 
 bool PoolCommunication::tryLogin(const Pool &pool)
 {
-    const auto socket = std::make_shared<sockwrapper::SocketWrapper>(
-        pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
-    );
+    std::shared_ptr<sockwrapper::SocketWrapper> socket;
 
-    std::stringstream stream;
+    if (pool.ssl)
+    {
+        socket = std::make_shared<sockwrapper::SSLSocketWrapper>(
+            pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
+        );
+    }
+    else
+    {
+        socket = std::make_shared<sockwrapper::SocketWrapper>(
+            pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
+        );
+    }
 
     std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Attempting to connect to pool...") << std::endl;
 

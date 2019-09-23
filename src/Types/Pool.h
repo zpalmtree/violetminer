@@ -48,6 +48,9 @@ struct Pool
     /* The priority of this pool in the list of pools */
     size_t priority = 0;
 
+    /* Does this pool require SSL for connecting */
+    bool ssl = false;
+
     std::string getAgent() const
     {
         return agent == "" ? "violetminer-" + Constants::VERSION : agent;
@@ -62,7 +65,8 @@ struct Pool
             && rigID        == other.rigID
             && algorithm    == other.algorithm
             && agent        == other.agent
-            && loginID      == other.loginID;
+            && loginID      == other.loginID
+            && ssl          == other.ssl;
     }
 
     bool operator!=(const Pool& other) const
@@ -82,7 +86,8 @@ inline void to_json(nlohmann::json &j, const Pool &pool)
         {"algorithm", pool.algorithm},
         {"agent", pool.agent},
         {"niceHash", pool.niceHash},
-        {"priority", pool.priority}
+        {"priority", pool.priority},
+        {"ssl", pool.ssl}
     };
 }
 
@@ -126,5 +131,10 @@ inline void from_json(const nlohmann::json &j, Pool &pool)
     if (j.find("priority") != j.end())
     {
         pool.priority = j.at("priority").get<size_t>();
+    }
+
+    if (j.find("ssl") != j.end())
+    {
+        pool.ssl = j.at("ssl").get<bool>();
     }
 }
