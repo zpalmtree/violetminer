@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.8)
 project(violetminer LANGUAGES CXX)
 
 option(ENABLE_NVIDIA "Enable Nvidia support" ON)
+option(ENABLE_SSL "Enable SSL support if available" ON)
 
 if (ENABLE_NVIDIA)
     enable_language(CUDA)
@@ -77,7 +78,7 @@ endif ()
 
 # We have to look for Homebrew OpenSSL a bit differently
 # Borrowed from https://github.com/tarantool/tarantool/commit/6eab201af1843f53a833c8928dc58fceffa08147
-if (APPLE)
+if (APPLE AND ENABLE_SSL)
     find_program(HOMEBREW_EXECUTABLE brew)
     execute_process(COMMAND ${HOMEBREW_EXECUTABLE} --prefix openssl
             OUTPUT_VARIABLE HOMEBREW_OPENSSL
@@ -91,10 +92,12 @@ if (APPLE)
 endif ()
 
 # Try and find OpenSSL
-find_package(OpenSSL)
+if (ENABLE_SSL)
+    find_package(OpenSSL)
+endif()
 
 # Didn't work. Lets try finding it with PkgConfig instead
-if (NOT OPENSSL_FOUND)
+if (NOT OPENSSL_FOUND AND ENABLE_SSL)
     find_package(PkgConfig)
 
     if (PKG_CONFIG_FOUND)
@@ -114,8 +117,10 @@ if (OPENSSL_FOUND)
     add_definitions(-DSOCKETWRAPPER_OPENSSL_SUPPORT)
 
     message(STATUS "OpenSSL Found: ${OPENSSL_INCLUDE_DIR}")
-else ()
+elseif(ENABLE_SSL)
     message(STATUS "OpenSSL Found: No... Skipping...")
+else()
+    message(STATUS "OpenSSL disabled: Not searching.")
 endif ()
 
 add_subdirectory(src)

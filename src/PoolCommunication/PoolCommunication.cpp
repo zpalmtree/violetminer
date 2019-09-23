@@ -266,6 +266,7 @@ bool PoolCommunication::tryLogin(const Pool &pool)
 {
     std::shared_ptr<sockwrapper::SocketWrapper> socket;
 
+    #if defined(SOCKETWRAPPER_OPENSSL_SUPPORT)
     if (pool.ssl)
     {
         socket = std::make_shared<sockwrapper::SSLSocketWrapper>(
@@ -274,10 +275,13 @@ bool PoolCommunication::tryLogin(const Pool &pool)
     }
     else
     {
+    #endif
         socket = std::make_shared<sockwrapper::SocketWrapper>(
             pool.host.c_str(), pool.port, '\n', Constants::POOL_LOGIN_RETRY_INTERVAL / 1000
         );
+    #if defined(SOCKETWRAPPER_OPENSSL_SUPPORT)
     }
+    #endif
 
     std::cout << InformationMsg(formatPool(pool)) << SuccessMsg("Attempting to connect to pool...") << std::endl;
 

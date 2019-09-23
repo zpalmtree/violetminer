@@ -5,12 +5,14 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 #include <string>
 
 #include "ArgonVariants/Variants.h"
 #include "Config/Constants.h"
 #include "ExternalLibs/json.hpp"
 #include "Types/IHashingAlgorithm.h"
+#include "Utilities/ColouredMsg.h"
 
 struct Pool
 {
@@ -136,5 +138,13 @@ inline void from_json(const nlohmann::json &j, Pool &pool)
     if (j.find("ssl") != j.end())
     {
         pool.ssl = j.at("ssl").get<bool>();
+
+        #if !defined(SOCKETWRAPPER_OPENSSL_SUPPORT)
+        if (pool.ssl)
+        {
+            std::cout << WarningMsg("Warning: SSL is enabled for pool " + pool.host + ", but miner was not compiled with SSL support!") << std::endl
+                      << WarningMsg("If this pool is indeed SSL only, connecting will fail. Try another port or compile with SSL support.") << std::endl;
+        }
+        #endif
     }
 }
