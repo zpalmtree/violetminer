@@ -369,6 +369,8 @@ bool PoolCommunication::tryLogin(const Pool &pool)
 
 void PoolCommunication::managePools()
 {
+    auto lastKeptAlive = std::chrono::high_resolution_clock::now();
+
     while (!m_shouldStop)
     {
         if (m_shouldFindNewPool) {
@@ -405,9 +407,10 @@ void PoolCommunication::managePools()
         {
             continue;
         }
-        else
+        else if (lastKeptAlive + std::chrono::seconds(120) < std::chrono::high_resolution_clock::now())
         {
             keepAlive();
+            lastKeptAlive = std::chrono::high_resolution_clock::now();
         }
 
         std::unique_lock<std::mutex> lock(m_mutex);
