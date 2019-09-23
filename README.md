@@ -18,6 +18,10 @@ A CPU and NVIDIA miner for TurtleCoin / Chukwa / Argon2id / WrkzCoin.
 
 If you prefer to compile yourself, read on. This can result in increased hashrates in some cases.
 
+## Setup / Usage
+
+We suggest you follow the [guide here](https://docs.turtlecoin.lol/guides/mining/violetminer-guide) to setup your miner.
+
 ## Algorithms Supported
 * TurtleCoin - choose `turtlecoin` or `chukwa`
 * WrkzCoin - choose `wrkzcoin` or `chukwa_wrkz`
