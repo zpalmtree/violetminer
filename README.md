@@ -81,17 +81,19 @@ For example:
             "port": 2225,
             "priority": 0,
             "rigID": "",
+            "ssl": false,
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
             "agent": "",
             "algorithm": "turtlecoin",
-            "host": "donate.futuregadget.xyz",
+            "host": "pool.turtle.hashvault.pro",
             "niceHash": true,
             "password": "x",
-            "port": 3333,
+            "port": 443,
             "priority": 2,
             "rigID": "",
+            "ssl": true,
             "username": "TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW"
         },
         {
@@ -103,6 +105,7 @@ For example:
             "port": 3005,
             "priority": 1,
             "rigID": "",
+            "ssl": false,
             "username": "WrkzjJMM8h9F8kDU59KUdTN8PvZmzu2HchyBG15R4SjLD4EcMg6qVWo3Qeqp4nNhgh1CPL7ixCL1P4MNwNPr5nTw11ma1MMXr7"
         }
     ]
