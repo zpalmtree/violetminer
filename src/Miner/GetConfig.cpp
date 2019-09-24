@@ -699,11 +699,14 @@ MinerConfig getMinerConfig(int argc, char **argv)
         ("username", "The username to use with the pool, normally your wallet address",
          cxxopts::value<std::string>(poolConfig.username), "<username>")
 
-        ("password", "The password to use with the pool, can be omitted",
+        ("password", "The password to use with the pool",
          cxxopts::value<std::string>(poolConfig.password), "<password>")
 
-        ("rigid", "The rig ID to use with the pool, can be omitted",
-         cxxopts::value<std::string>(poolConfig.rigID), "<rig ID>");
+        ("rigid", "The rig ID to use with the pool",
+         cxxopts::value<std::string>(poolConfig.rigID), "<rig ID>")
+
+        ("ssl", "Should we use SSL with this pool",
+         cxxopts::value<bool>(poolConfig.ssl)->implicit_value("true"));
 
     options.add_options("Miner")
         ("algorithm", "The mining algorithm to use",
@@ -782,6 +785,14 @@ MinerConfig getMinerConfig(int argc, char **argv)
                 std::cout << WarningMsg("Username cannot be empty!") << std::endl;
                 Console::exitOrWaitForInput(1);
             }
+
+            #if !defined(SOCKETWRAPPER_OPENSSL_SUPPORT)
+            if (poolConfig.ssl)
+            {
+                std::cout << WarningMsg("Warning: SSL is enabled, but miner was not compiled with SSL support!") << std::endl
+                          << WarningMsg("If this pool is indeed SSL only, connecting will fail. Try another port or compile with SSL support.") << std::endl;
+            }
+            #endif
 
             try
             {
