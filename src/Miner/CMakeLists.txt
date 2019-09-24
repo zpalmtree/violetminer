@@ -5,6 +5,10 @@ add_executable(violetminer main.cpp GetConfig.cpp)
 
 if (OPENSSL_FOUND)
     target_link_libraries(violetminer ${OPENSSL_LIBRARIES})
+
+    if (MSVC)
+        target_link_libraries(violetminer ws2_32 gdi32 advapi32 crypt32 user32)
+    endif()
 endif()
 
 # Link violetminer to the libraries it uses
