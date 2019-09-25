@@ -55,7 +55,7 @@ struct Pool
 
     std::string getAgent() const
     {
-        return agent == "" ? "violetminer-" + Constants::VERSION : agent;
+        return agent == "" ? "violetminer/" + Constants::VERSION_NUMBER : agent;
     }
 
     bool operator==(const Pool& other) const
