@@ -139,6 +139,9 @@ matrix:
     - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
     - sudo apt-key add 7fa2af80.pub
     - sudo apt update -qq
+    - sudo apt install aptitude
+    - sudo aptitude install cuda-cross-aarch64
+    - sudo apt install -y cuda-cudart-cross-aarch64-8-0
     - sudo apt install -y cuda-cross-aarch64-8-0
     - sudo apt install -y cuda-cross-aarch64
     - sudo apt clean
