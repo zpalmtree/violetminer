@@ -133,15 +133,27 @@ matrix:
     script:
     - eval $MATRIX_EVAL
     - source scripts/prep-aarch64.sh 
-    - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
-    - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
-    - sudo dpkg --add-architecture arm64
-    - sudo dpkg -i ${INSTALLER}
-    - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
-    - sudo apt-key add 7fa2af80.pub
-    - sudo apt update -qq
-    - sudo apt install -y cuda-cross-aarch64
-    - sudo apt clean
+    #- INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
+    #- wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
+    - wget http://developer.download.nvidia.com/devzone/devcenter/mobile/jetpack_l4t/013/linux-x64/cuda-repo-l4t-8-0-local_8.0.84-1_arm64.deb && \
+    - wget http://developer.download.nvidia.com/devzone/devcenter/mobile/jetpack_l4t/013/linux-x64/libcudnn6_6.0.21-1+cuda8.0_arm64.deb && \
+    - sudo dpkg -i cuda-repo-l4t-8-0-local_8.0.84-1_arm64.deb
+    - sudo dpkg -i libcudnn6_6.0.21-1+cuda8.0_arm64.deb
+    - sudo apt update -y
+    - sudo apt install cuda-cudart-cross-aarch64-8-0 cuda-cublas-cross-aarch64-8-0 \
+        cuda-nvml-cross-aarch64-8-0 cuda-nvrtc-cross-aarch64-8-0 cuda-cufft-cross-aarch64-8-0 \
+        cuda-curand-cross-aarch64-8-0 cuda-cusolver-cross-aarch64-8-0 cuda-cusparse-cross-aarch64-8-0 \
+        cuda-misc-headers-cross-aarch64-8-0 cuda-npp-cross-aarch64-8-0 libcudnn6 -y
+    - sudo cp /usr/local/cuda-8.0/targets/aarch64-linux/lib/*.so /usr/local/cuda/lib64/
+    - sudo cp /usr/local/cuda-8.0/targets/aarch64-linux/lib/stubs/*.so /usr/local/cuda/lib64/stubs/
+    - sudo cp -r /usr/local/cuda-8.0/targets/aarch64-linux/include/ /usr/local/cuda/include/
+    # - sudo dpkg --add-architecture arm64
+    # - sudo dpkg -i ${INSTALLER}
+    # - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
+    # - sudo apt-key add 7fa2af80.pub
+    # - sudo apt update -qq
+    # - sudo apt install -y cuda-cross-aarch64
+    # - sudo apt clean
     - CUDA_HOME=/usr/local/cuda
     - ls /usr/local/cuda/targets/
     - ls /usr/local/cuda/targets/aarch64-linux/
