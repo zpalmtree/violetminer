@@ -135,21 +135,12 @@ matrix:
     - source scripts/prep-aarch64.sh 
     - INSTALLER=cuda-repo-${UBUNTU_VERSION}_${CUDA}_amd64.deb
     - wget http://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/${INSTALLER}
+    - sudo dpkg --add-architecture arm64
     - sudo dpkg -i ${INSTALLER}
     - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
     - sudo apt-key add 7fa2af80.pub
     - sudo apt update -qq
-    #- sudo apt install aptitude
-    #- sudo aptitude install cuda-cross-aarch64
-    - sudo apt-get -o Dpkg::Options::="--force-architecture" install \
-         cuda-nvrtc-cross-aarch64-8-0:arm64 cuda-cusolver-cross-aarch64-8-0:arm64 \
-         cuda-cudart-cross-aarch64-8-0:arm64 cuda-cublas-cross-aarch64-8-0:arm64 \
-         cuda-cufft-cross-aarch64-8-0:arm64 cuda-curand-cross-aarch64-8-0:arm64 \
-         cuda-cusparse-cross-aarch64-8-0:arm64 cuda-npp-cross-aarch64-8-0:arm64 \
-         cuda-nvml-cross-aarch64-8-0:arm64 cuda-nvgraph-cross-aarch64-8-0:arm64
-    #- sudo apt install -y cuda-cudart-cross-aarch64-8-0
-    #- sudo apt install -y cuda-cross-aarch64-8-0
-    #- sudo apt install -y cuda-cross-aarch64
+    - sudo apt install -y cuda-cross-aarch64
     - sudo apt clean
     - CUDA_HOME=/usr/local/cuda
     - ls /usr/local/cuda/targets/
