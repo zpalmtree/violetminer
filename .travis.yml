@@ -22,10 +22,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-linux"
     - RELEASE_FILETYPE="tar.gz"
     - CUDA_SUPPORT="ON"
-    - CUDA_PATH="/usr/local/cuda"
-    - CUDA_BIN_PATH="/usr/local/cuda/bin"
     - CUDA=10.1.243-1
-    - CUDA_SHORT=10.1.243-1
     - UBUNTU_VERSION=ubuntu1604
     before_install:
     - eval $MATRIX_EVAL
@@ -36,7 +33,6 @@ matrix:
     - sudo apt-key add 7fa2af80.pub
     - sudo apt update -qq
     - sudo apt install -y cuda
-    - sudo apt clean
     - CUDA_HOME=/usr/local/cuda
     - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
     - PATH=${CUDA_HOME}/bin:${PATH}
@@ -61,10 +57,7 @@ matrix:
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
     - CUDA_SUPPORT="ON"
-    - CUDA_PATH="/usr/local/cuda"
-    - CUDA_BIN_PATH="/usr/local/cuda/bin"
     - CUDA=10.1.243-1
-    - CUDA_SHORT=10.1.243-1
     - UBUNTU_VERSION=ubuntu1604
     before_install:
     - eval $MATRIX_EVAL
@@ -75,7 +68,6 @@ matrix:
     - sudo apt-key add 7fa2af80.pub
     - sudo apt update -qq
     - sudo apt install -y cuda
-    - sudo apt clean
     - CUDA_HOME=/usr/local/cuda
     - LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
     - PATH=${CUDA_HOME}/bin:${PATH}
@@ -124,11 +116,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-armv8"
     - RELEASE_FILETYPE="tar.gz"
     - _DEPLOYABLE="true"
-    - CUDA_SUPPORT="ON"
-    - CUDA_PATH="/usr/local/cuda"
-    - CUDA_BIN_PATH="/usr/local/cuda/bin"
     - CUDA=10.1.243-1
-    - CUDA_SHORT=10.1.243-1
     - UBUNTU_VERSION=ubuntu1604
     script:
     - eval $MATRIX_EVAL
@@ -140,14 +128,13 @@ matrix:
     - sudo dpkg -i ${INSTALLER}
     - wget https://developer.download.nvidia.com/compute/cuda/repos/${UBUNTU_VERSION}/x86_64/7fa2af80.pub
     - sudo apt-key add 7fa2af80.pub
-    - sudo apt update -qq
+    - sudo apt update -qq || echo ""
     - sudo apt install -y cuda-cross-aarch64
-    - sudo apt clean
     - CUDA_HOME=/usr/local/cuda
     - LD_LIBRARY_PATH=${CUDA_HOME}/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}
     - PATH=${CUDA_HOME}/bin:${PATH}
     - mkdir build && cd build
-    - cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NVIDIA=$CUDA_SUPPORT ..
+    - cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_NVIDIA=ON ..
     - make -j2
     - mkdir $RELEASE_FILENAME
     - mv violetminer $RELEASE_FILENAME
