@@ -279,6 +279,12 @@ Reminder to use clang if possible. Make sure to set `CC` and `CXX` to point to `
 - `cmake -DENABLE_NVIDIA=OFF ..`
 - `make`
 
+Or, if you hate typing and just want something to copy paste, try this single command:
+
+```
+cd && rm -Rf violetminer && apt-get update && pkg update -y && pkg install cmake clang git -y && git clone https://github.com/turtlecoin/violetminer && mkdir violetminer/build && cd violetminer/ && git submodule update --init --recursive && cd build/ && cmake -DENABLE_NVIDIA=OFF .. && make
+```
+
 ### Android Cross Compile
 
 Using [this](https://android.googlesource.com/platform/ndk/+/ndk-release-r20/build/cmake/android.toolchain.cmake) toolchain
