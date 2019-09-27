@@ -268,6 +268,17 @@ Reminder to use clang if possible. Make sure to set `CC` and `CXX` to point to `
 - `cmake ..`
 - `make`
 
+### Android with Termux
+
+- `pkg install cmake clang git` (Enter `y` to confirm the install)
+- `git clone https://github.com/turtlecoin/violetminer`
+- `cd violetminer`
+- `git submodule update --init --recursive`
+- `mkdir build`
+- `cd build`
+- `cmake -DENABLE_NVIDIA=OFF ..`
+- `make`
+
 ### Android Cross Compile
 
 Using [this](https://android.googlesource.com/platform/ndk/+/ndk-release-r20/build/cmake/android.toolchain.cmake) toolchain
