@@ -160,11 +160,11 @@ int main(int argc, char **argv)
     MinerManager userMinerManager(userPoolManager, config.hardwareConfiguration, false);
     MinerManager devMinerManager(devPoolManager, config.hardwareConfiguration, true);
 
-    /* A cycle lasts 100 minutes */
-    const auto cycleLength = std::chrono::minutes(100);
+    /* A cycle lasts 300 minutes */
+    const auto cycleLength = std::chrono::minutes(300);
 
-    /* We mine for the dev for DEV_FEE_PERCENT off the 100 minutes */
-    const auto devMiningTime = std::chrono::seconds(static_cast<uint8_t>(60 * Constants::DEV_FEE_PERCENT));
+    /* We mine for the dev for DEV_FEE_PERCENT of the 300 minutes */
+    const auto devMiningTime = std::chrono::seconds(static_cast<uint32_t>(180 * Constants::DEV_FEE_PERCENT));
 
     /* We mine for the user for the rest of the time */
     const auto userMiningTime = cycleLength - devMiningTime;
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     {
         std::random_device device;
         std::mt19937 rng(device());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(10, 60);
+        std::uniform_int_distribution<std::mt19937::result_type> dist(10, 180);
 
         /* Start mining for the user */
         userMinerManager.start();
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
             userMinerManager.stop();
 
             std::cout << InformationMsg("=== Started mining to the development pool - Thank you for supporting violetminer! ===") << std::endl;
-            std::cout << InformationMsg("=== This will last for " + std::to_string(devMiningTime.count()) + " seconds. (Every 100 minutes) ===") << std::endl;
+            std::cout << InformationMsg("=== This will last for " + std::to_string(devMiningTime.count()) + " seconds. (Every 300 minutes) ===") << std::endl;
 
             /* Start mining for the dev */
             devMinerManager.start();
