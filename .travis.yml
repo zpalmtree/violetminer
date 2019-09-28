@@ -109,7 +109,7 @@ matrix:
 
   # Arm (aarch64) cross compile
   - os: linux
-    dist: bionic 
+    dist: xenial
     env:
     - MATRIX_EVAL="CC=aarch64-linux-gnu-gcc && CXX=aarch64-linux-gnu-g++"
     - LABEL="aarch64"
