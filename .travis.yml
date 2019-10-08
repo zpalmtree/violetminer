@@ -127,8 +127,7 @@ matrix:
     - ls
     - whereis sdkmanager
     - echo $PATH
-    - /usr/bin/sdkmanager --help
-    - /usr/bin/sdkmanager
+    - /usr/bin/sdkmanager --cli install --user zp+nvidia@zacharypalmer.co.uk --logintype devzone --product Jetson --version 4.2 --targetos Linux --host --target P2888 --license accept --logs
     #- sudo apt update -y
     #- sudo dpkg --add-architecture arm64
     #- sudo dpkg -i ${INSTALLER}
