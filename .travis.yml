@@ -126,7 +126,9 @@ matrix:
     - sudo apt -o APT::Sandbox::User=root install --reinstall ./sdkmanager_0.9.14-4964_amd64.deb
     - ls
     - whereis sdkmanager
-    - sdkmanager --help
+    - echo $PATH
+    - /usr/bin/sdkmanager --help
+    - /usr/bin/sdkmanager
     #- sudo apt update -y
     #- sudo dpkg --add-architecture arm64
     #- sudo dpkg -i ${INSTALLER}
