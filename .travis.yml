@@ -123,7 +123,9 @@ matrix:
     - source scripts/prep-aarch64.sh 
     - wget www.futuregadget.xyz/sdkmanager_0.9.14-4964_amd64.deb
     - sudo add-apt-repository universe && sudo apt-get update
-    - sudo apt install ./sdkmanager_0.9.14-4964_amd64.deb
+    - sudo apt -o APT::Sandbox::User=root install --reinstall ./sdkmanager_0.9.14-4964_amd64.deb
+    - ls
+    - whereis sdkmanager
     - sdkmanager --help
     #- sudo apt update -y
     #- sudo dpkg --add-architecture arm64
