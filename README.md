@@ -47,7 +47,7 @@ There are a couple of ways to configure the miner.
 
 For example:
 ```
-./violetminer --algorithm turtlecoin --pool pool.turtlecoin.dev:5555 --username TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW
+./violetminer --algorithm turtlecoin --pool trtl.pool.mine2gether.com:2225 --username TRTLv2Fyavy8CXG8BPEbNeCHFZ1fuDCYCZ3vW5H5LXN4K2M2MHUpTENip9bbavpHvvPwb4NDkBWrNgURAd5DB38FHXWZyoBh4wW
 ```
 
 * Copy the below config to `config.json` and modify to your purposes.
