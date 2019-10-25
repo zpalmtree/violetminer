@@ -36,6 +36,7 @@ Want the miner to support another argon coin? Open an issue, or even better, ope
 
 * Dev fee is 1%.
 * Supports [xmrig-proxy](https://github.com/xmrig/xmrig-proxy) - Make sure to enable `"niceHash": true` in your pool config.
+* Getting an error about a missing MSVCP140.dll or vcrruntime140.dll? Try installing this: https://www.microsoft.com/en-us/download/details.aspx?id=48145
 
 ## Configuring
 
