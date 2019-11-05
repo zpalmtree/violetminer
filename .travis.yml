@@ -134,9 +134,9 @@ matrix:
     - RELEASE_FILETYPE="zip"
     - _DEPLOYABLE="true"
     - CUDA_VER="10.1"
-    - CUDA_ARCHIVE="cuda_10.1.243_426.00_win10.exe"
+    - CUDA_ARCHIVE="cuda_8.0.61_win10.exe"
     script:
-    - wget -nv https://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDA_ARCHIVE
+    - wget -nv https://developer.nvidia.com/compute/cuda/$CUDA_VER/Prod2/local_installers/$CUDA_ARCHIVE
     - PowerShell -Command "Start-Process -FilePath \"$CUDA_ARCHIVE\" -ArgumentList \"-s nvcc_$CUDA_VER\" -Wait -NoNewWindow"
     - 7z x $CUDA_ARCHIVE > nul
     - wget -nv https://slproweb.com/download/Win64OpenSSL-1_1_1d.exe
