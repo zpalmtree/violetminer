@@ -133,7 +133,7 @@ matrix:
     - RELEASE_FILENAME="violetminer-win64"
     - RELEASE_FILETYPE="zip"
     - _DEPLOYABLE="true"
-    - CUDA_VER="10.1"
+    - CUDA_VER="8.0"
     - CUDA_ARCHIVE="cuda_8.0.61_win10.exe"
     script:
     - wget -nv https://developer.nvidia.com/compute/cuda/$CUDA_VER/Prod2/local_installers/$CUDA_ARCHIVE
