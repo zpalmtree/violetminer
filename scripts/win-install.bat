@@ -1,5 +1,10 @@
 copy CUDAVisualStudioIntegration\\extras\\visual_studio_integration\\MSBuildExtensions\\* "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\IDE\VC\VCTargets\BuildCustomizations\"
 
+dir C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0
+dir C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin
+dir C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin\win64
+dir C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin\win64\Release
+
 set PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin;%PATH%
 set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin;%PATH%
 
